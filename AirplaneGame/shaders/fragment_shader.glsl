@@ -1,13 +1,13 @@
 ﻿#version 330
 
-in vec4 color_in;
+out vec4 outputColor;
 
-out vec4 color_out;
+in vec2 texCoord;
 
+uniform sampler2D texture0;
+uniform sampler2D texture1;
 
-
-void main() {
-//	color_out = vec4(color_in, 0.0f);
-	//color_out = vec4(0.0f, 1.0f, 1.0f, 1.0f);
-	color_out = color_in;
+void main()
+{
+    outputColor = mix(texture(texture0, texCoord), texture(texture1, texCoord), 0.2);
 }
