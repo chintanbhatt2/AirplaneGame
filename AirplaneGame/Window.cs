@@ -11,6 +11,15 @@ using OpenTK.Windowing.Desktop;
 
 namespace AirplaneGame
 {
+    // We now have a rotating rectangle but how can we make the view move based on the users input?
+    // In this tutorial we will take a look at how you could implement a camera class
+    // and start responding to user input.
+    // You can move to the camera class to see a lot of the new code added.
+    // Otherwise you can move to Load to see how the camera is initialized.
+
+    // In reality, we can't move the camera but we actually move the rectangle.
+    // This will explained more in depth in the web version, however it pretty much gives us the same result
+    // as if the view itself was moved.
     public class Window : GameWindow
     {
         private readonly float[] _vertices =
@@ -40,16 +49,19 @@ namespace AirplaneGame
 
         private Texture _texture2;
 
-        // We create a double to hold how long has passed since the program was opened.
+        // The view and projection matrices have been removed as we don't need them here anymore.
+        // They can now be found in the new camera class.
+
+        // We need an instance of the new camera class so it can manage the view and projection matrix code.
+        // We also need a boolean set to true to detect whether or not the mouse has been moved for the first time.
+        // Finally, we add the last position of the mouse so we can calculate the mouse offset easily.
+        private Camera _camera;
+
+        private bool _firstMove = true;
+
+        private Vector2 _lastPos;
+
         private double _time;
-
-        // Then, we create two matrices to hold our view and projection. They're initialized at the bottom of OnLoad.
-        // The view matrix is what you might consider the "camera". It represents the current viewport in the window.
-        private Matrix4 _view;
-
-        // This represents how the vertices will be projected. It's hard to explain through comments,
-        // so check out the web version for a good demonstration of what this does.
-        private Matrix4 _projection;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -62,9 +74,6 @@ namespace AirplaneGame
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-            // We enable depth testing here. If you try to draw something more complex than one plane without this,
-            // you'll notice that polygons further in the background will occasionally be drawn over the top of the ones in the foreground.
-            // Obviously, we don't want this, so we enable depth testing. We also clear the depth buffer in GL.Clear over in OnRenderFrame.
             GL.Enable(EnableCap.DepthTest);
 
             _vertexArrayObject = GL.GenVertexArray();
@@ -78,8 +87,7 @@ namespace AirplaneGame
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
-            // shader.vert has been modified. Take a look at it after the explanation in OnRenderFrame.
-            _shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+            _shader = new Shader(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
             _shader.Use();
 
             var vertexLocation = _shader.GetAttribLocation("aPosition");
@@ -90,37 +98,29 @@ namespace AirplaneGame
             GL.EnableVertexAttribArray(texCoordLocation);
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
-            _texture = Texture.LoadFromFile("Resources/container.png");
+            _texture = Texture.LoadFromFile(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\resources\container.png");
             _texture.Use(TextureUnit.Texture0);
 
-            _texture2 = Texture.LoadFromFile("Resources/awesomeface.png");
+            _texture2 = Texture.LoadFromFile(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\resources\awesomeface.png");
             _texture2.Use(TextureUnit.Texture1);
 
             _shader.SetInt("texture0", 0);
             _shader.SetInt("texture1", 1);
 
-            // For the view, we don't do too much here. Next tutorial will be all about a Camera class that will make it much easier to manipulate the view.
-            // For now, we move it backwards three units on the Z axis.
-            _view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
+            // We initialize the camera so that it is 3 units back from where the rectangle is.
+            // We also give it the proper aspect ratio.
+            _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
 
-            // For the matrix, we use a few parameters.
-            //   Field of view. This determines how much the viewport can see at once. 45 is considered the most "realistic" setting, but most video games nowadays use 90
-            //   Aspect ratio. This should be set to Width / Height.
-            //   Near-clipping. Any vertices closer to the camera than this value will be clipped.
-            //   Far-clipping. Any vertices farther away from the camera than this value will be clipped.
-            _projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), Size.X / (float)Size.Y, 0.1f, 100.0f);
-
-            // Now, head over to OnRenderFrame to see how we setup the model matrix.
+            // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
+            CursorGrabbed = true;
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
 
-            // We add the time elapsed since last frame, times 4.0 to speed up animation, to the total amount of time passed.
             _time += 4.0 * e.Time;
 
-            // We clear the depth buffer in addition to the color buffer.
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.BindVertexArray(_vertexArrayObject);
@@ -129,21 +129,10 @@ namespace AirplaneGame
             _texture2.Use(TextureUnit.Texture1);
             _shader.Use();
 
-            // Finally, we have the model matrix. This determines the position of the model.
             var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
-
-            // Then, we pass all of these matrices to the vertex shader.
-            // You could also multiply them here and then pass, which is faster, but having the separate matrices available is used for some advanced effects.
-
-            // IMPORTANT: OpenTK's matrix types are transposed from what OpenGL would expect - rows and columns are reversed.
-            // They are then transposed properly when passed to the shader. 
-            // This means that we retain the same multiplication order in both OpenTK c# code and GLSL shader code.
-            // If you pass the individual matrices to the shader and multiply there, you have to do in the order "model * view * projection".
-            // You can think like this: first apply the modelToWorld (aka model) matrix, then apply the worldToView (aka view) matrix, 
-            // and finally apply the viewToProjectedSpace (aka projection) matrix.
             _shader.SetMatrix4("model", model);
-            _shader.SetMatrix4("view", _view);
-            _shader.SetMatrix4("projection", _projection);
+            _shader.SetMatrix4("view", _camera.GetViewMatrix());
+            _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
@@ -154,12 +143,75 @@ namespace AirplaneGame
         {
             base.OnUpdateFrame(e);
 
+            if (!IsFocused) // Check to see if the window is focused
+            {
+                return;
+            }
+
             var input = KeyboardState;
 
             if (input.IsKeyDown(Keys.Escape))
             {
                 Close();
             }
+
+            const float cameraSpeed = 1.5f;
+            const float sensitivity = 0.2f;
+
+            if (input.IsKeyDown(Keys.W))
+            {
+                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
+            }
+
+            if (input.IsKeyDown(Keys.S))
+            {
+                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
+            }
+            if (input.IsKeyDown(Keys.A))
+            {
+                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
+            }
+            if (input.IsKeyDown(Keys.D))
+            {
+                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
+            }
+            if (input.IsKeyDown(Keys.Space))
+            {
+                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
+            }
+            if (input.IsKeyDown(Keys.LeftShift))
+            {
+                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
+            }
+
+            // Get the mouse state
+            var mouse = MouseState;
+
+            if (_firstMove) // This bool variable is initially set to true.
+            {
+                _lastPos = new Vector2(mouse.X, mouse.Y);
+                _firstMove = false;
+            }
+            else
+            {
+                // Calculate the offset of the mouse position
+                var deltaX = mouse.X - _lastPos.X;
+                var deltaY = mouse.Y - _lastPos.Y;
+                _lastPos = new Vector2(mouse.X, mouse.Y);
+
+                // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
+                _camera.Yaw += deltaX * sensitivity;
+                _camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
+            }
+        }
+
+        // In the mouse wheel function, we manage all the zooming of the camera.
+        // This is simply done by changing the FOV of the camera.
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            _camera.Fov -= e.OffsetY;
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -167,6 +219,8 @@ namespace AirplaneGame
             base.OnResize(e);
 
             GL.Viewport(0, 0, Size.X, Size.Y);
+            // We need to update the aspect ratio once the window has been resized.
+            _camera.AspectRatio = Size.X / (float)Size.Y;
         }
     }
 }

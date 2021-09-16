@@ -13,11 +13,13 @@ namespace AirplaneGame
             var nativeWindowSettings = new NativeWindowSettings()
             {
                 Size = new Vector2i(800, 600),
+
                 Title = "LearnOpenTK - Coordinates Systems",
             };
 
             using (var window = new Window(GameWindowSettings.Default, nativeWindowSettings))
             {
+                window.RenderFrequency = 144.0;
                 window.Run();
             }
         }
