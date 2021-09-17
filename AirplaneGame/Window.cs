@@ -22,16 +22,59 @@ namespace AirplaneGame
     // as if the view itself was moved.
     public class Window : GameWindow
     {
-        private readonly float[] _vertices =
-        {
+        float[] _vertices = {
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
+        private float[] _vertices_old =
+{
             // Position         Texture coordinates
-             0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-             0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
+             277.25708f,  132.5251f, 319.520721f, 1.0f, 1.0f, // top right
+             277.0854f, 132.5251f, 319.535339f, 1.0f, 0.0f, // bottom right
+             277.25708f, 132.5251f, 320.5367f, 0.0f, 0.0f, // bottom left
+            277.7526f,  132.5251f, 319.64975f, 0.0f, 1.0f  // top left
         };
 
-        private readonly uint[] _indices =
+        private readonly uint[] _indices_old =
         {
             0, 1, 3,
             1, 2, 3
@@ -72,6 +115,11 @@ namespace AirplaneGame
         {
             base.OnLoad();
 
+            ModelParsing.STL _stl = new ModelParsing.STL("..\\..\\..\\..\\Chintan_STL\\Airo1 - Propeller-2.STL");
+
+            _vertices = _stl.getVertexArray();
+
+
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
@@ -83,33 +131,37 @@ namespace AirplaneGame
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
-            _elementBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
+            //_elementBufferObject = GL.GenBuffer();
+            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
-            _shader = new Shader(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
+            _shader = new Shader("..\\..\\..\\shaders\\vertex_shader.glsl", "..\\..\\..\\shaders\\fragment_shader.glsl");
             _shader.Use();
 
             var vertexLocation = _shader.GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            //GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
+
 
             var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation);
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
-            _texture = Texture.LoadFromFile(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\resources\container.png");
+            _texture = Texture.LoadFromFile("..\\..\\..\\resources\\container.png");
             _texture.Use(TextureUnit.Texture0);
 
-            _texture2 = Texture.LoadFromFile(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\resources\awesomeface.png");
+            _texture2 = Texture.LoadFromFile("..\\..\\..\\resources\\awesomeface.png");
             _texture2.Use(TextureUnit.Texture1);
 
-            _shader.SetInt("texture0", 0);
-            _shader.SetInt("texture1", 1);
+            //_shader.SetInt("texture0", 0);
+            //_shader.SetInt("texture1", 1);
 
             // We initialize the camera so that it is 3 units back from where the rectangle is.
             // We also give it the proper aspect ratio.
-            _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            _camera = new Camera(new Vector3(_vertices[0]+5, _vertices[1]+5, _vertices[3]+5), Size.X / (float)Size.Y);
+
 
             // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
             CursorGrabbed = true;
@@ -129,19 +181,28 @@ namespace AirplaneGame
             _texture2.Use(TextureUnit.Texture1);
             _shader.Use();
 
-            var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
-            _shader.SetMatrix4("model", model);
+            //var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
+            //_shader.SetMatrix4("model", model);
+            _shader.SetMatrix4("model", Matrix4.Identity);
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
+            //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Count());
             SwapBuffers();
         }
 
+        void drawString() //TODO: Create a draw string function in order to create debug text on screen
+        {
+
+        }
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
+
+            System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2}", _camera.Position, _camera.Pitch, _camera.Yaw);
+
+         
 
             if (!IsFocused) // Check to see if the window is focused
             {
@@ -155,7 +216,7 @@ namespace AirplaneGame
                 Close();
             }
 
-            const float cameraSpeed = 1.5f;
+            float cameraSpeed = 15f;
             const float sensitivity = 0.2f;
 
             if (input.IsKeyDown(Keys.W))
@@ -182,6 +243,14 @@ namespace AirplaneGame
             if (input.IsKeyDown(Keys.LeftShift))
             {
                 _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
+            }
+            if (input.IsKeyPressed(Keys.LeftControl))
+            {
+                cameraSpeed = 15.0f;
+            }
+            if (input.IsKeyReleased(Keys.LeftControl))
+            {
+                cameraSpeed = 1.5f;
             }
 
             // Get the mouse state

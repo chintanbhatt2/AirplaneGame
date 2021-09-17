@@ -46,6 +46,28 @@ namespace AirplaneGame
                     this.mesh.Triangles.Add(tri);
                 }
             }
+
+            public float[] getVertexArray()
+            {
+                float[] arrayList = new float[this.mesh.triangleCount * 9];
+                
+
+                for (int i = 0; i < this.mesh.triangleCount; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        for (int k = 0; k < 3; k++)
+                        {
+                            arrayList[i*9 + j*3 + k] = this.mesh.Triangles.ElementAt(i).Verticies.ElementAt(j).Coord[k];
+
+                        }
+
+                    }
+                }
+
+
+                return arrayList;
+            }
         }
     }
 }
