@@ -11,15 +11,7 @@ using OpenTK.Windowing.Desktop;
 
 namespace AirplaneGame
 {
-    // We now have a rotating rectangle but how can we make the view move based on the users input?
-    // In this tutorial we will take a look at how you could implement a camera class
-    // and start responding to user input.
-    // You can move to the camera class to see a lot of the new code added.
-    // Otherwise you can move to Load to see how the camera is initialized.
 
-    // In reality, we can't move the camera but we actually move the rectangle.
-    // This will explained more in depth in the web version, however it pretty much gives us the same result
-    // as if the view itself was moved.
     public class Window : GameWindow
     {
         float[] _vertices = {
@@ -65,14 +57,7 @@ namespace AirplaneGame
     -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
-        private float[] _vertices_old =
-{
-            // Position         Texture coordinates
-             277.25708f,  132.5251f, 319.520721f, 1.0f, 1.0f, // top right
-             277.0854f, 132.5251f, 319.535339f, 1.0f, 0.0f, // bottom right
-             277.25708f, 132.5251f, 320.5367f, 0.0f, 0.0f, // bottom left
-            277.7526f,  132.5251f, 319.64975f, 0.0f, 1.0f  // top left
-        };
+
 
         private readonly uint[] _indices_old =
         {
@@ -92,12 +77,7 @@ namespace AirplaneGame
 
         private Texture _texture2;
 
-        // The view and projection matrices have been removed as we don't need them here anymore.
-        // They can now be found in the new camera class.
 
-        // We need an instance of the new camera class so it can manage the view and projection matrix code.
-        // We also need a boolean set to true to detect whether or not the mouse has been moved for the first time.
-        // Finally, we add the last position of the mouse so we can calculate the mouse offset easily.
         private Camera _camera;
 
         private bool _firstMove = true;
@@ -135,7 +115,7 @@ namespace AirplaneGame
             //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
-            _shader = new Shader("..\\..\\..\\shaders\\vertex_shader.glsl", "..\\..\\..\\shaders\\fragment_shader.glsl");
+            _shader = new Shader("..\\..\\..\\..\\shaders\\vertex_shader.glsl", "..\\..\\..\\..\\shaders\\fragment_shader.glsl");
             _shader.Use();
 
             var vertexLocation = _shader.GetAttribLocation("aPosition");
@@ -148,22 +128,16 @@ namespace AirplaneGame
             GL.EnableVertexAttribArray(texCoordLocation);
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
-            _texture = Texture.LoadFromFile("..\\..\\..\\resources\\container.png");
-            _texture.Use(TextureUnit.Texture0);
 
-            _texture2 = Texture.LoadFromFile("..\\..\\..\\resources\\awesomeface.png");
-            _texture2.Use(TextureUnit.Texture1);
 
             //_shader.SetInt("texture0", 0);
             //_shader.SetInt("texture1", 1);
 
-            // We initialize the camera so that it is 3 units back from where the rectangle is.
-            // We also give it the proper aspect ratio.
+
             //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             _camera = new Camera(new Vector3(_vertices[0]+5, _vertices[1]+5, _vertices[3]+5), Size.X / (float)Size.Y);
 
 
-            // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
             CursorGrabbed = true;
         }
 
@@ -177,8 +151,7 @@ namespace AirplaneGame
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            _texture.Use(TextureUnit.Texture0);
-            _texture2.Use(TextureUnit.Texture1);
+
             _shader.Use();
 
             //var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
@@ -204,7 +177,7 @@ namespace AirplaneGame
 
          
 
-            if (!IsFocused) // Check to see if the window is focused
+            if (!IsFocused)
             {
                 return;
             }
@@ -221,28 +194,28 @@ namespace AirplaneGame
 
             if (input.IsKeyDown(Keys.W))
             {
-                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
+                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
             }
 
             if (input.IsKeyDown(Keys.S))
             {
-                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
+                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
             }
             if (input.IsKeyDown(Keys.A))
             {
-                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
+                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
             }
             if (input.IsKeyDown(Keys.D))
             {
-                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
+                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
             }
             if (input.IsKeyDown(Keys.Space))
             {
-                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
+                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time;
             }
             if (input.IsKeyDown(Keys.LeftShift))
             {
-                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
+                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time;
             }
             if (input.IsKeyPressed(Keys.LeftControl))
             {
@@ -253,29 +226,26 @@ namespace AirplaneGame
                 cameraSpeed = 1.5f;
             }
 
-            // Get the mouse state
+            
             var mouse = MouseState;
 
-            if (_firstMove) // This bool variable is initially set to true.
+            if (_firstMove) 
             {
                 _lastPos = new Vector2(mouse.X, mouse.Y);
                 _firstMove = false;
             }
             else
             {
-                // Calculate the offset of the mouse position
                 var deltaX = mouse.X - _lastPos.X;
                 var deltaY = mouse.Y - _lastPos.Y;
                 _lastPos = new Vector2(mouse.X, mouse.Y);
 
-                // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
                 _camera.Yaw += deltaX * sensitivity;
                 _camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
             }
         }
 
-        // In the mouse wheel function, we manage all the zooming of the camera.
-        // This is simply done by changing the FOV of the camera.
+
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
             base.OnMouseWheel(e);
@@ -288,7 +258,6 @@ namespace AirplaneGame
             base.OnResize(e);
 
             GL.Viewport(0, 0, Size.X, Size.Y);
-            // We need to update the aspect ratio once the window has been resized.
             _camera.AspectRatio = Size.X / (float)Size.Y;
         }
     }
