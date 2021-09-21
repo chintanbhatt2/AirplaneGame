@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Assimp;
 using OpenTK.Mathematics;
+using OpenTK.Graphics.OpenGL4;
 
 
 namespace AirplaneGame
@@ -24,7 +25,7 @@ namespace AirplaneGame
         }
 
 
-        public Structures.Tex[] textures_loaded = { };
+        public Structures.Texture[] textures_loaded = { };
         public Structures.Mesh[] meshes = {};
         public string directory;
         public bool gammaCorrection;
@@ -56,7 +57,7 @@ namespace AirplaneGame
         {
             Structures.Vertex[] vertices = { };
             int[] indicies = { };
-            Structures.Tex[] textures = { };
+            Structures.Texture[] textures = { };
 
             for(int i = 0; i < mesh.VertexCount; i++)
             {
@@ -87,10 +88,12 @@ namespace AirplaneGame
                     vector.X = mesh.Tangents[i].X;
                     vector.Y = mesh.Tangents[i].Y;
                     vector.Z = mesh.Tangents[i].Z;
+                    vertex.Tangent = vector;
 
                     vector.X = mesh.BiTangents[i].X;
                     vector.Y = mesh.BiTangents[i].Y;
                     vector.Z = mesh.BiTangents[i].Z;
+                    vertex.Bitangent = vector;
                 }
                 else
                     vertex.TexCoord = new Vector2(0.0f, 0.0f);
@@ -107,16 +110,16 @@ namespace AirplaneGame
 
                 Material material = scene.Materials[mesh.MaterialIndex];
 
-                Structures.Tex[] diffuseMaps = loadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
+                Structures.Texture[] diffuseMaps = loadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
                 textures.Concat(diffuseMaps);
 
-                Structures.Tex[] specularMaps = loadMaterialTextures(material, TextureType.Specular, "texture_specular");
+                Structures.Texture[] specularMaps = loadMaterialTextures(material, TextureType.Specular, "texture_specular");
                 textures.Concat(specularMaps);
 
-                Structures.Tex[] normalMaps = loadMaterialTextures(material, TextureType.Normals, "texture_normal");
+                Structures.Texture[] normalMaps = loadMaterialTextures(material, TextureType.Normals, "texture_normal");
                 textures.Concat(normalMaps);
 
-                Structures.Tex[] heightMaps = loadMaterialTextures(material, TextureType.Height, "texture_height");
+                Structures.Texture[] heightMaps = loadMaterialTextures(material, TextureType.Height, "texture_height");
                 textures.Concat(heightMaps);
 
 
@@ -126,9 +129,9 @@ namespace AirplaneGame
             return new Structures.Mesh(vertices, indicies, textures);
         }
 
-        private Structures.Tex[] loadMaterialTextures(Material mat, TextureType type, string typeName)
+        private Structures.Texture[] loadMaterialTextures(Material mat, TextureType type, string typeName)
         {
-            Structures.Tex[] textures;
+            Structures.Texture[] textures = { };
             for(int i = 0; i < mat.GetMaterialTextureCount(type); i++)
             {
                 TextureSlot str;
@@ -137,11 +140,89 @@ namespace AirplaneGame
                 bool skip = false;
                 for (int j = 0; j < textures_loaded.Length; j++)
                 {
-                    if(textures_loaded[j])
+                    if(textures_loaded[j].path == null)
+                    {
+                        textures.Append(textures_loaded[j]);
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if(!skip)
+                {
+                    //TODO: Fix this
                 }
             }
+
+
+
+            return textures;
         }
 
+        private int LoadTextureFromFile(string path, string directory, bool gamma)
+        {
+            string filename = path;
+            filename = directory + '/' + filename;
 
+            int textureID;
+            textureID = GL.GenTexture();
+            
+
+            int width = 0, height = 0, nrComponents = 0;
+            byte[] data = { };
+            
+            using (var ms = new System.IO.MemoryStream() )
+            {
+                System.Drawing.Image imin = System.Drawing.Image.FromFile(path);
+                imin.Save(ms, imin.RawFormat);
+                data = ms.ToArray();
+            }
+
+            if (data != null)
+            {
+
+                PixelInternalFormat iformat = new PixelInternalFormat();
+                PixelFormat format = new PixelFormat();
+
+
+                if (nrComponents == 1)
+                {
+                    iformat = PixelInternalFormat.R16f;
+                    format = PixelFormat.Red;
+                }
+                    
+                else if (nrComponents == 3)
+                {
+                    iformat = PixelInternalFormat.Rgb;
+                    format = PixelFormat.Rgb;
+                }
+                else if (nrComponents == 4)
+                {
+                    iformat = PixelInternalFormat.Rgba;
+                    format = PixelFormat.Rgba;
+                }
+
+                GL.BindTexture(TextureTarget.Texture2D, textureID);
+
+                GL.TexImage2D(TextureTarget.Texture2D, 0, iformat, width, height, 0, format, PixelType.UnsignedByte, data); //TODO: Fix this
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                int[] GL_REPEAT = { (int)OpenTK.Graphics.ES20.TextureWrapMode.Repeat };
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, GL_REPEAT);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, GL_REPEAT);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, GL_REPEAT);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+                string error = data;
+            }
+            else
+            {
+                System.Console.WriteLine("Texture failed to load at path", path);
+            }
+
+            return textureID;
+        }
     }
 }

@@ -25,7 +25,7 @@ namespace AirplaneGame
                 for (int i = 0; i < this.mesh.triangleCount; i++)
                 {
                     Structures.Triangle tri = new Structures.Triangle();
-                    float[] floatList = new float[3];
+                    Vector3 floatList;
                     for (int j = 0; j < 3; j++)
                     {
                         floatList[j] = binaryReader.ReadSingle();
@@ -38,7 +38,8 @@ namespace AirplaneGame
                         {
                             floatList[k] = binaryReader.ReadSingle();
                         }
-                        Structures.Vertex vert = new Structures.Vertex(floatList[0], floatList[1], floatList[2]);
+                        Structures.Vertex vert = new Structures.Vertex();
+                        vert.Position = floatList;
                         tri.AddVertex(vert);
                     }
 

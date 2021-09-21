@@ -16,13 +16,17 @@ namespace AirplaneGame
         {
             public Vector3 Position, Normal; 
             public Vector2 TexCoord;
+            public Vector3 Tangent, Bitangent;
+            int[] m_BoneIDs;
+            float[] m_Weights;
+
         }
 
-        public struct Tex
+        public struct Texture
         {
             public int id;
             public string type;
-            public int al;
+            public string path;
         }
 
         public class Triangle
@@ -53,9 +57,9 @@ namespace AirplaneGame
             
             public Vertex[] vertices = { };
             public int[] indicies = { };
-            Tex[] textures = { };
+            Texture[] textures = { };
 
-            public Mesh(Vertex[] vertices, int[] indicies, Tex[] textures)
+            public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures)
             {
                 this.vertices = vertices;
                 this.indicies = indicies;
