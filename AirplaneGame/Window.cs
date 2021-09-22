@@ -95,38 +95,39 @@ namespace AirplaneGame
         {
             base.OnLoad();
 
-            ModelParsing.STL _stl = new ModelParsing.STL("..\\..\\..\\..\\Chintan_STL\\Airo1 - Propeller-2.STL");
+            //ModelParsing.STL _stl = new ModelParsing.STL("..\\..\\..\\..\\Chintan_STL\\Airo1 - Propeller-2.STL");
 
-            _vertices = _stl.getVertexArray();
+            Model _stl = new Model(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Chintan_STL\untitled.stl");
 
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
 
-            _vertexArrayObject = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObject);
+            //_vertexArrayObject = GL.GenVertexArray();
+            //GL.BindVertexArray(_vertexArrayObject);
 
-            _vertexBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+            //_vertexBufferObject = GL.GenBuffer();
+            //GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+            //GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
             //_elementBufferObject = GL.GenBuffer();
             //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
             _shader = new Shader("..\\..\\..\\..\\shaders\\vertex_shader.glsl", "..\\..\\..\\..\\shaders\\fragment_shader.glsl");
-            _shader.Use();
+            //_stl.Draw(_shader);
+            //_shader.Use();
 
-            var vertexLocation = _shader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            //GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
+            //var vertexLocation = _shader.GetAttribLocation("aPosition");
+            //GL.EnableVertexAttribArray(vertexLocation);
+            //GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            ////GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
 
 
-            var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
-            GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            //var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
+            //GL.EnableVertexAttribArray(texCoordLocation);
+            //GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
 
 
@@ -134,8 +135,10 @@ namespace AirplaneGame
             //_shader.SetInt("texture1", 1);
 
 
-            //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
-            _camera = new Camera(new Vector3(_vertices[0]+5, _vertices[1]+5, _vertices[3]+5), Size.X / (float)Size.Y);
+            //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);s
+            _stl.Draw(_shader);
+
+            _camera = new Camera(new Vector3(3, 3, 3), Size.X / (float)Size.Y);
 
 
             CursorGrabbed = true;

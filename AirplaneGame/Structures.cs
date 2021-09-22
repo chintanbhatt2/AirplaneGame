@@ -11,7 +11,7 @@ namespace AirplaneGame
 {
     public class Structures
     {
-        private const int sizeOfVertex = sizeof(float) * 8;
+        private const int MAX_BONE_INFLUENCE = 4;
         public struct Vertex
         {
             public Vector3 Position, Normal; 
@@ -20,6 +20,17 @@ namespace AirplaneGame
             int[] m_BoneIDs;
             float[] m_Weights;
 
+        }
+        private unsafe static int sizeOfVertex()
+        {
+            int byteCount = 0;
+
+            byteCount += sizeof(Vector3) * 4;
+            byteCount += sizeof(Vector2);
+            byteCount += sizeof(int) * MAX_BONE_INFLUENCE;
+            byteCount += sizeof(float) * MAX_BONE_INFLUENCE;
+
+            return byteCount;
         }
 
         public struct Texture
@@ -79,22 +90,22 @@ namespace AirplaneGame
 
                 GL.BindVertexArray(VAO);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-                GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeOfVertex, vertices, BufferUsageHint.StaticDraw);
+                GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeOfVertex(), vertices, BufferUsageHint.StaticDraw);
 
                 GL.BindBuffer(BufferTarget.ArrayBuffer, EBO);
                 GL.BufferData(BufferTarget.ArrayBuffer, indicies.Length * sizeof(int), indicies, BufferUsageHint.StaticDraw);
 
                 //positions
                 GL.EnableVertexAttribArray(0);
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeOfVertex, 0);
+                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeOfVertex(), 0);
 
                 //normals
                 GL.EnableVertexAttribArray(1);
-                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeOfVertex, sizeof(float) * 3);
+                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeOfVertex(), sizeof(float) * 3);
 
                 //tex coords
                 GL.EnableVertexAttribArray(2);
-                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, sizeOfVertex, sizeof(float) * 6);
+                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, sizeOfVertex(), sizeof(float) * 6);
 
                 GL.BindVertexArray(0);
             }

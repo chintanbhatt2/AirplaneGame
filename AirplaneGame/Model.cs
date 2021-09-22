@@ -18,7 +18,7 @@ namespace AirplaneGame
         }
         public void Draw(Shader shader)
         {
-            for(int i = 0; i < meshes.Length; i++)
+            for(int i = 0; i < meshes.Count; i++)
             {
                 meshes[i].Draw(shader);
             }
@@ -26,16 +26,16 @@ namespace AirplaneGame
 
 
         public Structures.Texture[] textures_loaded = { };
-        public Structures.Mesh[] meshes = {};
+        public List<Structures.Mesh> meshes = new List<Structures.Mesh>();
         public string directory;
-        public bool gammaCorrection;
+        public bool gammaCorrection = false;
 
         private void loadModel(string path)
         {
             var context = new Assimp.AssimpContext();
             Scene aiScene = context.ImportFile(path, PostProcessSteps.Triangulate | PostProcessSteps.FlipUVs);
 
-            directory = path.Substring(0, path.LastIndexOf("/"));
+            directory = path.Substring(0, path.LastIndexOf(@"\"));
 
             processNode(aiScene.RootNode, aiScene);
         }
@@ -44,7 +44,7 @@ namespace AirplaneGame
             for(int i = 0; i < node.MeshCount; i++)
             {
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
-                meshes.Append(processMesh(mesh, scene));
+                this.meshes.Add(processMesh(mesh, scene));
             }
 
             for(int i = 0; i < node.ChildCount; i++)
@@ -55,13 +55,13 @@ namespace AirplaneGame
 
         private Structures.Mesh processMesh(Mesh mesh, Scene scene)
         {
-            Structures.Vertex[] vertices = { };
-            int[] indicies = { };
-            Structures.Texture[] textures = { };
+            List<Structures.Vertex> vertices = new List<Structures.Vertex>();
+            List<int> indicies = new List<int>();
+            List<Structures.Texture> textures = new List<Structures.Texture>();
 
             for(int i = 0; i < mesh.VertexCount; i++)
             {
-                Structures.Vertex vertex;
+                Structures.Vertex vertex = new Structures.Vertex();
                 Vector3 vector;
 
                 vector.X = mesh.Vertices[i].X;
@@ -75,6 +75,8 @@ namespace AirplaneGame
                     vector.X = mesh.Normals[i].X;
                     vector.Y = mesh.Normals[i].Y;
                     vector.Z = mesh.Normals[i].Z;
+
+                    vertex.Normal = vector;
                 }
 
                 if (mesh.HasTextureCoords(0))
@@ -96,42 +98,43 @@ namespace AirplaneGame
                     vertex.Bitangent = vector;
                 }
                 else
-                    vertex.TexCoord = new Vector2(0.0f, 0.0f);
-
-                for (int i = 0; i < mesh.FaceCount; i++)
                 {
-                    Face face = mesh.Faces[i];
-
-                    for (int j = 0; j < face.IndexCount; j++)
-                    {
-                        indicies.Append(face.Indices[j]);
-                    }
+                    vertex.TexCoord = new Vector2(0.0f, 0.0f);
                 }
+                vertices.Add(vertex);
+            }
+            for (int i = 0; i < mesh.FaceCount; i++)
+            {
+                Face face = mesh.Faces[i];
 
-                Material material = scene.Materials[mesh.MaterialIndex];
-
-                Structures.Texture[] diffuseMaps = loadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
-                textures.Concat(diffuseMaps);
-
-                Structures.Texture[] specularMaps = loadMaterialTextures(material, TextureType.Specular, "texture_specular");
-                textures.Concat(specularMaps);
-
-                Structures.Texture[] normalMaps = loadMaterialTextures(material, TextureType.Normals, "texture_normal");
-                textures.Concat(normalMaps);
-
-                Structures.Texture[] heightMaps = loadMaterialTextures(material, TextureType.Height, "texture_height");
-                textures.Concat(heightMaps);
-
-
-                return new Structures.Mesh(vertices, indicies, textures);
+                for (int j = 0; j < face.IndexCount; j++)
+                {
+                    indicies.Add(face.Indices[j]);
+                }
             }
 
-            return new Structures.Mesh(vertices, indicies, textures);
+            Material material = scene.Materials[mesh.MaterialIndex];
+
+            Structures.Texture[] diffuseMaps = loadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
+            textures.Concat(diffuseMaps);
+
+            Structures.Texture[] specularMaps = loadMaterialTextures(material, TextureType.Specular, "texture_specular");
+            textures.Concat(specularMaps);
+
+            Structures.Texture[] normalMaps = loadMaterialTextures(material, TextureType.Normals, "texture_normal");
+            textures.Concat(normalMaps);
+
+            Structures.Texture[] heightMaps = loadMaterialTextures(material, TextureType.Height, "texture_height");
+            textures.Concat(heightMaps);
+
+
+            return new Structures.Mesh(vertices.ToArray(), indicies.ToArray(), textures.ToArray());
+            
         }
 
         private Structures.Texture[] loadMaterialTextures(Material mat, TextureType type, string typeName)
         {
-            Structures.Texture[] textures = { };
+            List<Structures.Texture> textures = new List<Structures.Texture>();
             for(int i = 0; i < mat.GetMaterialTextureCount(type); i++)
             {
                 TextureSlot str;
@@ -142,7 +145,7 @@ namespace AirplaneGame
                 {
                     if(textures_loaded[j].path == null)
                     {
-                        textures.Append(textures_loaded[j]);
+                        textures.Add(textures_loaded[j]);
                         skip = true;
                         break;
                     }
@@ -156,7 +159,7 @@ namespace AirplaneGame
 
 
 
-            return textures;
+            return textures.ToArray();
         }
 
         private int LoadTextureFromFile(string path, string directory, bool gamma)
@@ -214,8 +217,6 @@ namespace AirplaneGame
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, GL_REPEAT);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-                string error = data;
             }
             else
             {
