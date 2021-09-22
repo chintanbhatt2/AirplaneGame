@@ -12,14 +12,13 @@ namespace AirplaneGame
     public class Structures
     {
         private const int MAX_BONE_INFLUENCE = 4;
-        public struct Vertex
+        public class Vertex
         {
             public Vector3 Position, Normal; 
             public Vector2 TexCoord;
             public Vector3 Tangent, Bitangent;
             int[] m_BoneIDs;
             float[] m_Weights;
-
         }
         private unsafe static int sizeOfVertex()
         {
@@ -80,11 +79,36 @@ namespace AirplaneGame
             }
 
             private int VAO, VBO, EBO;
-            private void setupMesh()
+
+            private float[] getVertexArray()
+            {
+                float[] varray = new float[vertices.Length*3];
+
+                for(int i = 0; i < vertices.Length; i++)
+                {
+                    //TODO: get floats into array
+                }
+
+                return varray;
+            }
+
+            private float[] getNormalArray()
+            {
+                float[] narray = new float[vertices.Length*3];
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    //TODO: get floats into array
+                }
+                return narray;
+            }
+
+            private void setupMesh() //TODO: update code for C# reference based
             {
                 VAO = GL.GenVertexArray();
                 VBO = GL.GenBuffer();
                 EBO = GL.GenBuffer();
+
+                var _verts = new float[] { };
 
                 
 
