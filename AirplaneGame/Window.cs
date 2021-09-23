@@ -86,6 +86,8 @@ namespace AirplaneGame
 
         private double _time;
 
+        public List<Model> _stls = new List<Model>();
+
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
@@ -95,10 +97,20 @@ namespace AirplaneGame
         {
             base.OnLoad();
 
-            //ModelParsing.STL _stl = new ModelParsing.STL("..\\..\\..\\..\\Chintan_STL\\Airo1 - Propeller-2.STL");
+            //Model _stl = new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-1 HorizontalStab1Move-1.STL");
+            //_stls.Add(_stl);
+            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-1 HorizontalStab1stat-1.STL"));
+            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-2 HorizontalStab1Move-1.STL"));
+            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-2 HorizontalStab1stat-1.STL"));
+            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - frontwheel-1 frontwheelconnection-1.STL"));
+            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - frontwheel-1 Wheel-1.STL"));
 
-            Model _stl = new Model(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Chintan_STL\untitled.stl");
+            
 
+            foreach (string name in System.IO.Directory.GetFiles(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL"))
+            {
+                _stls.Add(new Model(@name));
+            }
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -115,7 +127,7 @@ namespace AirplaneGame
             //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
-            _shader = new Shader("..\\..\\..\\..\\shaders\\vertex_shader.glsl", "..\\..\\..\\..\\shaders\\fragment_shader.glsl");
+            _shader = new Shader(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
             //_stl.Draw(_shader);
             //_shader.Use();
 
@@ -136,35 +148,47 @@ namespace AirplaneGame
 
 
             //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);s
-            _stl.Draw(_shader);
 
-            _camera = new Camera(new Vector3(3, 3, 3), Size.X / (float)Size.Y);
+            _camera = new Camera(new Vector3(3, 1, 7), Size.X / (float)Size.Y);
 
 
             CursorGrabbed = true;
         }
-
+            
+        private float scaleFactor = 0.1f;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
 
             _time += 4.0 * e.Time;
 
+            GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.BindVertexArray(_vertexArrayObject);
+            //_shader.Use();
 
 
-            _shader.Use();
-
-            //var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
-            //_shader.SetMatrix4("model", model);
+            var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
+            _shader.SetMatrix4("model", model);
             _shader.SetMatrix4("model", Matrix4.Identity);
+            _shader.SetMatrix4("model", new Matrix4(scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, 1));
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-            //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Count());
+            //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0)
+
+            //glm::mat4 model = glm::mat4(1.0f);
+            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+            //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
+            //ourShader.setMat4("model", model);
+            //ourModel.Draw(ourShader);
+
+            foreach (Model x in _stls)
+            {
+                x.Draw(_shader);
+            }
+
             SwapBuffers();
         }
 
@@ -176,7 +200,7 @@ namespace AirplaneGame
         {
             base.OnUpdateFrame(e);
 
-            System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2}", _camera.Position, _camera.Pitch, _camera.Yaw);
+            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2}", _camera.Position, _camera.Pitch, _camera.Yaw);
 
          
 
@@ -227,6 +251,14 @@ namespace AirplaneGame
             if (input.IsKeyReleased(Keys.LeftControl))
             {
                 cameraSpeed = 1.5f;
+            }
+            if (input.IsKeyPressed(Keys.F1))
+            {
+                scaleFactor -= 0.1f;
+            }
+            if (input.IsKeyPressed(Keys.F2))
+            {
+                scaleFactor += 0.1f;
             }
 
             

@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace AirplaneGame
 {
-    class Model
+    public class Model
     {
         public Model(string path)
         {
