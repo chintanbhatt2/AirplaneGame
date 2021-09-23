@@ -57,6 +57,7 @@ namespace AirplaneGame
             public Vertex[] vertices = { };
             public int[] indicies = { };
             Texture[] textures = { };
+            public Matrix4 transformMatrix = Matrix4.Identity;
 
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures)
             {
@@ -84,7 +85,6 @@ namespace AirplaneGame
                     varray[i * 8 + 6] = vertices[i].TexCoord.X;
                     varray[i * 8 + 7] = vertices[i].TexCoord.Y;
                 }
-
                 return varray;
             }
 
@@ -126,7 +126,8 @@ namespace AirplaneGame
             {
                 int diffuseNo = 1;
                 int specularNo = 1;
-
+                shader.SetMatrix4("model", transformMatrix);
+                //TODO: Figure out how to set transform matrix
                 for(int i = 0; i < textures.Length; i++)
                 {
                     GL.ActiveTexture(TextureUnit.Texture0 + 1);

@@ -44,7 +44,7 @@ namespace AirplaneGame
             for(int i = 0; i < node.MeshCount; i++)
             {
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
-                this.meshes.Add(processMesh(mesh, scene));
+                this.meshes.Add(processMesh(mesh, scene, node));
             }
 
             for(int i = 0; i < node.ChildCount; i++)
@@ -53,7 +53,7 @@ namespace AirplaneGame
             }
         }
 
-        private Structures.Mesh processMesh(Mesh mesh, Scene scene)
+        private Structures.Mesh processMesh(Mesh mesh, Scene scene, Node node)
         {
             List<Structures.Vertex> vertices = new List<Structures.Vertex>();
             List<int> indicies = new List<int>();
@@ -87,15 +87,21 @@ namespace AirplaneGame
                     vec.Y = mesh.TextureCoordinateChannels.ElementAt(0).ElementAt(i).Y;
                     vertex.TexCoord = vec;
 
-                    vector.X = mesh.Tangents[i].X;
-                    vector.Y = mesh.Tangents[i].Y;
-                    vector.Z = mesh.Tangents[i].Z;
-                    vertex.Tangent = vector;
+                    if(!(mesh.Tangents.Count == 0))
+                    {
+                        vector.X = mesh.Tangents[i].X;
+                        vector.Y = mesh.Tangents[i].Y;
+                        vector.Z = mesh.Tangents[i].Z;
+                        vertex.Tangent = vector;
+                    }
 
-                    vector.X = mesh.BiTangents[i].X;
-                    vector.Y = mesh.BiTangents[i].Y;
-                    vector.Z = mesh.BiTangents[i].Z;
-                    vertex.Bitangent = vector;
+                    if (!(mesh.Tangents.Count == 0))
+                    {
+                        vector.X = mesh.BiTangents[i].X;
+                        vector.Y = mesh.BiTangents[i].Y;
+                        vector.Z = mesh.BiTangents[i].Z;
+                        vertex.Bitangent = vector;
+                    }
                 }
                 else
                 {
@@ -127,9 +133,29 @@ namespace AirplaneGame
             Structures.Texture[] heightMaps = loadMaterialTextures(material, TextureType.Height, "texture_height");
             textures.Concat(heightMaps);
 
+            Structures.Mesh returnMesh = new Structures.Mesh(vertices.ToArray(), indicies.ToArray(), textures.ToArray());
 
-            return new Structures.Mesh(vertices.ToArray(), indicies.ToArray(), textures.ToArray());
+            Matrix4x4 assimpTransform = node.Transform;
+            Node previousNode = node;
+            assimpTransform = node.Transform;
+            while (node.Parent != null && node.Parent.Name != "Scene")
+            {
+                assimpTransform = assimpTransform * node.Parent.Transform ;
+                node = node.Parent;
+            }
+            node = previousNode;
+            returnMesh.transformMatrix = convertASSIMPtoOpenGLMat(assimpTransform);
+            return returnMesh;
             
+        }
+
+        private Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)
+        {
+            //  It's ugly but what can you do ¯\_(ツ)_/¯
+            return new Matrix4( assimp.A1, assimp.A2, assimp.A3, assimp.A4,
+                                assimp.B1, assimp.B2, assimp.B3, assimp.B4,
+                                assimp.C1, assimp.C2, assimp.C3, assimp.C4,
+                                assimp.D1, assimp.D2, assimp.D3, assimp.D4);
         }
 
         private Structures.Texture[] loadMaterialTextures(Material mat, TextureType type, string typeName)

@@ -65,18 +65,7 @@ namespace AirplaneGame
             1, 2, 3
         };
 
-        private int _elementBufferObject;
-
-        private int _vertexBufferObject;
-
-        private int _vertexArrayObject;
-
         private Shader _shader;
-
-        private Texture _texture;
-
-        private Texture _texture2;
-
 
         private Camera _camera;
 
@@ -97,60 +86,20 @@ namespace AirplaneGame
         {
             base.OnLoad();
 
-            //Model _stl = new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-1 HorizontalStab1Move-1.STL");
-            //_stls.Add(_stl);
-            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-1 HorizontalStab1stat-1.STL"));
-            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-2 HorizontalStab1Move-1.STL"));
-            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - Elev1-2 HorizontalStab1stat-1.STL"));
-            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - frontwheel-1 frontwheelconnection-1.STL"));
-            //_stls.Add(new Model(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL\Airo1 - frontwheel-1 Wheel-1.STL"));
+            //foreach (string name in System.IO.Directory.GetFiles(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Chintan_STL\"))
+            //{
+            //    _stls.Add(new Model(@name));
+            //}
 
-            
-
-            foreach (string name in System.IO.Directory.GetFiles(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\Chintan_STL"))
-            {
-                _stls.Add(new Model(@name));
-            }
+            _stls.Add(new Model(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Blender Objects\Airplane.dae"));
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
 
-            //_vertexArrayObject = GL.GenVertexArray();
-            //GL.BindVertexArray(_vertexArrayObject);
+            _shader = new Shader(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
 
-            //_vertexBufferObject = GL.GenBuffer();
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            //GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
-
-            //_elementBufferObject = GL.GenBuffer();
-            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
-
-            _shader = new Shader(@"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\source\repos\chintanbhatt2\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
-            //_stl.Draw(_shader);
-            //_shader.Use();
-
-            //var vertexLocation = _shader.GetAttribLocation("aPosition");
-            //GL.EnableVertexAttribArray(vertexLocation);
-            //GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            ////GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
-
-
-            //var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
-            //GL.EnableVertexAttribArray(texCoordLocation);
-            //GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-
-
-
-            //_shader.SetInt("texture0", 0);
-            //_shader.SetInt("texture1", 1);
-
-
-            //_camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);s
-
-            _camera = new Camera(new Vector3(3, 1, 7), Size.X / (float)Size.Y);
-
+            _camera = new Camera(new Vector3(30, 30, 30), Size.X / (float)Size.Y);
 
             CursorGrabbed = true;
         }
@@ -169,20 +118,12 @@ namespace AirplaneGame
             //_shader.Use();
 
 
-            var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
-            _shader.SetMatrix4("model", model);
-            _shader.SetMatrix4("model", Matrix4.Identity);
-            _shader.SetMatrix4("model", new Matrix4(scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, 1));
+            //var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
+            //_shader.SetMatrix4("model", model);
+            //_shader.SetMatrix4("model", new Matrix4(scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, 1));
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-            //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0)
-
-            //glm::mat4 model = glm::mat4(1.0f);
-            //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-            //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
-            //ourShader.setMat4("model", model);
-            //ourModel.Draw(ourShader);
 
             foreach (Model x in _stls)
             {
