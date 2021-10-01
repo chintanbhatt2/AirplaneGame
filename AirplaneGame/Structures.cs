@@ -38,7 +38,7 @@ namespace AirplaneGame
             public Matrix4 transformMatrix = Matrix4.Identity;
             public Matrix4 localMatrix = Matrix4.Identity;
             public Mesh Parent;
-            public Mesh[] Children;
+            public List<Mesh> Children = new List<Mesh>();
             public string Name;
 
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures, ref Mesh parent)

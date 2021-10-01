@@ -34,16 +34,8 @@ namespace AirplaneGame
         private Vector3 scale = new Vector3(1);
         private Structures.Mesh RootMesh;
         private Matrix4 ModelTransform = Matrix4.Identity;
-        private Dictionary<string, MeshReferece> MeshLocations = new Dictionary<string, MeshReferece>();
+        private Dictionary<string, Structures.Mesh> MeshLocations = new Dictionary<string, Structures.Mesh>();
 
-        class MeshReferece
-        {
-            public Structures.Mesh mesh { get; set; }
-            public MeshReferece(ref Structures.Mesh m)
-            {
-                mesh = m;
-            }
-        }
 
         public void rotateModel(float xRotation, float yRotation, float zRotation)
         {
@@ -64,11 +56,20 @@ namespace AirplaneGame
 
         private void updateTransformation(Structures.Mesh mesh)
         {
-            for(int i = 0; i < meshes.Count; i++)
-            {
-                meshes[i].transformMatrix *= ModelTransform;
 
+            if (mesh.Parent != null)
+            {
+                mesh.transformMatrix = mesh.Parent.transformMatrix * mesh.localMatrix;
             }
+            else
+            {
+                mesh.transformMatrix = mesh.transformMatrix * ModelTransform;
+            }
+            for (int i = 0; i < mesh.Children.Count; i++)
+            {
+                updateTransformation(mesh.Children[i]);
+            }
+
         }
         private void loadModel(string path)
         {
@@ -87,12 +88,18 @@ namespace AirplaneGame
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
 
                 this.meshes.Add(processMesh(mesh, scene, node));
-                MeshLocations.Add(mesh.Name, new MeshReferece(ref meshes[^1]));
+                MeshLocations.Add(node.Name, meshes[^1]);
+                if (node.Parent.Name != "Scene")
+                {
+                    MeshLocations[node.Parent.Name].Children.Add(meshes[^1]);
+                    meshes[^1].Parent = MeshLocations[node.Parent.Name];
+                }
             }
 
             for(int i = 0; i < node.ChildCount; i++)
             {
                 processNode(node.Children[i], scene);
+
             }
         }
 
@@ -181,9 +188,9 @@ namespace AirplaneGame
             Matrix4x4 assimpTransform = node.Transform;
             Node previousNode = node;
             assimpTransform = node.Transform;
+            returnMesh.localMatrix = convertASSIMPtoOpenGLMat(node.Transform);
             while (node.Parent != null && node.Parent.Name != "Scene")
             {
-                returnMesh.localMatrix = convertASSIMPtoOpenGLMat(node.Transform);
                 assimpTransform = assimpTransform * node.Parent.Transform ;
                 node = node.Parent;
             }

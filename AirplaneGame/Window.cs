@@ -156,12 +156,12 @@ namespace AirplaneGame
             {
                 if (input.IsKeyDown(Keys.W))
                 {
-                    _stls[0].rotateModel(-0.1f, 0, 0);
+                    _stls[0].rotateModel(-0.01f, 0, 0);
                 }
 
                 if (input.IsKeyDown(Keys.S))
                 {
-                    _stls[0].rotateModel(0.1f, 0, 0);
+                    _stls[0].rotateModel(0.01f, 0, 0);
                 }
                 if (input.IsKeyDown(Keys.A))
                 {
@@ -169,7 +169,7 @@ namespace AirplaneGame
                 }
                 if (input.IsKeyDown(Keys.D))
                 {
-                    _stls[0].rotateModel(-0.01f, 0, 0);
+                    _stls[0].rotateModel(0, -0.01f, 0);
                 }
 
                 if (input.IsKeyDown(Keys.Q))
