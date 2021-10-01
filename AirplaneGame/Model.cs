@@ -29,22 +29,65 @@ namespace AirplaneGame
         public List<Structures.Mesh> meshes = new List<Structures.Mesh>();
         public string directory;
         public bool gammaCorrection = false;
+        public OpenTK.Mathematics.Quaternion rotationVector = new OpenTK.Mathematics.Quaternion(new Vector3(0, 0, 0));
+        private Vector3 position = new Vector3(0f);
+        private Vector3 scale = new Vector3(1);
+        private Structures.Mesh RootMesh;
+        private Matrix4 ModelTransform = Matrix4.Identity;
+        private Dictionary<string, MeshReferece> MeshLocations = new Dictionary<string, MeshReferece>();
 
+        class MeshReferece
+        {
+            public Structures.Mesh mesh { get; set; }
+            public MeshReferece(ref Structures.Mesh m)
+            {
+                mesh = m;
+            }
+        }
+
+        public void rotateModel(float xRotation, float yRotation, float zRotation)
+        {
+            rotationVector =  new OpenTK.Mathematics.Quaternion( MathHelper.DegreesToRadians(xRotation), MathHelper.DegreesToRadians(yRotation), MathHelper.DegreesToRadians(zRotation));
+            ModelTransform = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale); 
+            updateTransformation(RootMesh);
+        }
+        public void rotateMesh(float xRotation, float yRotation, float zRotation, string name)
+        {
+            foreach (Structures.Mesh x in meshes)
+            {
+               if (x.Name == name)
+                {
+                    x.transformMatrix = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
+                }
+            }
+        }
+
+        private void updateTransformation(Structures.Mesh mesh)
+        {
+            for(int i = 0; i < meshes.Count; i++)
+            {
+                meshes[i].transformMatrix *= ModelTransform;
+
+            }
+        }
         private void loadModel(string path)
         {
             var context = new Assimp.AssimpContext();
             Scene aiScene = context.ImportFile(path, PostProcessSteps.Triangulate | PostProcessSteps.FlipUVs);
 
             directory = path.Substring(0, path.LastIndexOf(@"\"));
-
+            
             processNode(aiScene.RootNode, aiScene);
+            RootMesh = meshes[0];
         }
         private void processNode(Node node, Scene scene)
         {
             for(int i = 0; i < node.MeshCount; i++)
             {
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
+
                 this.meshes.Add(processMesh(mesh, scene, node));
+                MeshLocations.Add(mesh.Name, new MeshReferece(ref meshes[^1]));
             }
 
             for(int i = 0; i < node.ChildCount; i++)
@@ -140,13 +183,14 @@ namespace AirplaneGame
             assimpTransform = node.Transform;
             while (node.Parent != null && node.Parent.Name != "Scene")
             {
+                returnMesh.localMatrix = convertASSIMPtoOpenGLMat(node.Transform);
                 assimpTransform = assimpTransform * node.Parent.Transform ;
                 node = node.Parent;
             }
             node = previousNode;
             returnMesh.transformMatrix = convertASSIMPtoOpenGLMat(assimpTransform);
+            returnMesh.Name = mesh.Name;
             return returnMesh;
-            
         }
 
         private Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)

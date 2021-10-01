@@ -28,28 +28,6 @@ namespace AirplaneGame
             public string path;
         }
 
-        public class Triangle
-        {
-            public List<Vertex> Verticies = new List<Vertex>();
-            public Vector3 NormalVector;
-
-            public UInt16 AttributeCount;
-
-            public void AddVertex(Vertex vert)
-            {
-                this.Verticies.Add(vert);
-            }
-            public Triangle(Vertex x, Vertex y, Vertex z)
-            {
-                this.Verticies.Append(x);
-                this.Verticies.Append(y);
-                this.Verticies.Append(z);
-            }
-            public Triangle()
-            {
-
-            }
-        }
 
         public class Mesh
         {
@@ -58,12 +36,31 @@ namespace AirplaneGame
             public int[] indicies = { };
             Texture[] textures = { };
             public Matrix4 transformMatrix = Matrix4.Identity;
+            public Matrix4 localMatrix = Matrix4.Identity;
+            public Mesh Parent;
+            public Mesh[] Children;
+            public string Name;
+
+            public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures, ref Mesh parent)
+            {
+                this.vertices = vertices;
+                this.indicies = indicies;
+                this.textures = textures;
+
+                Parent = parent;
+
+
+                setupMesh();
+            }
 
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures)
             {
                 this.vertices = vertices;
                 this.indicies = indicies;
                 this.textures = textures;
+
+
+
 
                 setupMesh();
             }

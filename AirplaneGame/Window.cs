@@ -86,20 +86,20 @@ namespace AirplaneGame
         {
             base.OnLoad();
 
-            //foreach (string name in System.IO.Directory.GetFiles(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Chintan_STL\"))
-            //{
-            //    _stls.Add(new Model(@name));
-            //}
 
-            _stls.Add(new Model(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\Blender Objects\Airplane.dae"));
+            _stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane.dae"));
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
 
-            _shader = new Shader(@"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\vertex_shader.glsl", @"C:\Users\cb\Desktop\School\CS480\AirplaneGame\AirplaneGame\shaders\fragment_shader.glsl");
+            _shader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
 
-            _camera = new Camera(new Vector3(30, 30, 30), Size.X / (float)Size.Y);
+
+
+            _camera = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
+            _camera.Pitch = -13.799696f;
+            _camera.Yaw = -270.1763f;
 
             CursorGrabbed = true;
         }
@@ -118,9 +118,6 @@ namespace AirplaneGame
             //_shader.Use();
 
 
-            //var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
-            //_shader.SetMatrix4("model", model);
-            //_shader.SetMatrix4("model", new Matrix4(scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, scaleFactor, 0, 0, 0, 0, 1));
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
@@ -133,17 +130,13 @@ namespace AirplaneGame
             SwapBuffers();
         }
 
-        void drawString() //TODO: Create a draw string function in order to create debug text on screen
-        {
-
-        }
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
 
-            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2}", _camera.Position, _camera.Pitch, _camera.Yaw);
+            System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, _stls[0].rotationVector);
 
-         
+
 
             if (!IsFocused)
             {
@@ -159,40 +152,66 @@ namespace AirplaneGame
 
             float cameraSpeed = 15f;
             const float sensitivity = 0.2f;
+            if (input.IsKeyDown(Keys.LeftControl))
+            {
+                if (input.IsKeyDown(Keys.W))
+                {
+                    _stls[0].rotateModel(-0.1f, 0, 0);
+                }
 
-            if (input.IsKeyDown(Keys.W))
-            {
-                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
-            }
+                if (input.IsKeyDown(Keys.S))
+                {
+                    _stls[0].rotateModel(0.1f, 0, 0);
+                }
+                if (input.IsKeyDown(Keys.A))
+                {
+                    _stls[0].rotateModel(0, 0.01f, 0);
+                }
+                if (input.IsKeyDown(Keys.D))
+                {
+                    _stls[0].rotateModel(-0.01f, 0, 0);
+                }
 
-            if (input.IsKeyDown(Keys.S))
-            {
-                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
+                if (input.IsKeyDown(Keys.Q))
+                {
+                    _stls[0].rotateModel(0, 0, 0.01f);
+                }
+                if (input.IsKeyDown(Keys.E))
+                {
+                    _stls[0].rotateModel(0, 0, -0.01f);
+                }
             }
-            if (input.IsKeyDown(Keys.A))
+            else
             {
-                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
+                if (input.IsKeyDown(Keys.W))
+                {
+                    _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
+                }
+
+                if (input.IsKeyDown(Keys.S))
+                {
+                    _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
+                }
+                if (input.IsKeyDown(Keys.A))
+                {
+                    _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
+                }
+                if (input.IsKeyDown(Keys.D))
+                {
+                    _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
+                }
+                if (input.IsKeyDown(Keys.Space))
+
+                {
+                    _camera.Position += _camera.Up * cameraSpeed * (float)e.Time;
+                }
+                if (input.IsKeyDown(Keys.LeftShift))
+                {
+                    _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time;
+                }
             }
-            if (input.IsKeyDown(Keys.D))
-            {
-                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
-            }
-            if (input.IsKeyDown(Keys.Space))
-            {
-                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time;
-            }
-            if (input.IsKeyDown(Keys.LeftShift))
-            {
-                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time;
-            }
-            if (input.IsKeyPressed(Keys.LeftControl))
-            {
-                cameraSpeed = 15.0f;
-            }
-            if (input.IsKeyReleased(Keys.LeftControl))
-            {
-                cameraSpeed = 1.5f;
-            }
+ 
+
             if (input.IsKeyPressed(Keys.F1))
             {
                 scaleFactor -= 0.1f;
