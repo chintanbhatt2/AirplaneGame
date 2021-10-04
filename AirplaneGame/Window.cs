@@ -107,15 +107,18 @@ namespace AirplaneGame
         private float scaleFactor = 0.1f;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+
+
             base.OnRenderFrame(e);
 
             _time += 4.0 * e.Time;
-
             GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             //_shader.Use();
+
+            
 
 
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
@@ -134,8 +137,8 @@ namespace AirplaneGame
         {
             base.OnUpdateFrame(e);
 
-            System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, _stls[0].rotationVector);
-
+            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, _stls[0].rotationVector);
+            _stls[0].rotateMesh(0.1f, 0, 0, "Airo1_-_Propeller-2");
 
 
             if (!IsFocused)
@@ -156,29 +159,29 @@ namespace AirplaneGame
             {
                 if (input.IsKeyDown(Keys.W))
                 {
-                    _stls[0].rotateModel(-0.01f, 0, 0);
+                    _stls[0].rotateModel(-0.001f, 0, 0);
                 }
 
                 if (input.IsKeyDown(Keys.S))
                 {
-                    _stls[0].rotateModel(0.01f, 0, 0);
+                    _stls[0].rotateModel(0.001f, 0, 0);
                 }
                 if (input.IsKeyDown(Keys.A))
                 {
-                    _stls[0].rotateModel(0, 0.01f, 0);
+                    _stls[0].rotateModel(0, 0.001f, 0);
                 }
                 if (input.IsKeyDown(Keys.D))
                 {
-                    _stls[0].rotateModel(0, -0.01f, 0);
+                    _stls[0].rotateModel(0, -0.001f, 0);
                 }
 
                 if (input.IsKeyDown(Keys.Q))
                 {
-                    _stls[0].rotateModel(0, 0, 0.01f);
+                    _stls[0].rotateModel(0, 0, 0.001f);
                 }
                 if (input.IsKeyDown(Keys.E))
                 {
-                    _stls[0].rotateModel(0, 0, -0.01f);
+                    _stls[0].rotateModel(0, 0, -0.001f);
                 }
             }
             else

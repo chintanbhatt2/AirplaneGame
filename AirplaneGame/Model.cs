@@ -36,22 +36,26 @@ namespace AirplaneGame
         private Matrix4 ModelTransform = Matrix4.Identity;
         private Dictionary<string, Structures.Mesh> MeshLocations = new Dictionary<string, Structures.Mesh>();
 
-
+        
         public void rotateModel(float xRotation, float yRotation, float zRotation)
         {
             rotationVector =  new OpenTK.Mathematics.Quaternion( MathHelper.DegreesToRadians(xRotation), MathHelper.DegreesToRadians(yRotation), MathHelper.DegreesToRadians(zRotation));
-            ModelTransform = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale); 
+            ModelTransform = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
+            rotationVector.Normalize();
+
+
             updateTransformation(RootMesh);
         }
+
         public void rotateMesh(float xRotation, float yRotation, float zRotation, string name)
         {
-            foreach (Structures.Mesh x in meshes)
-            {
-               if (x.Name == name)
-                {
-                    x.transformMatrix = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
-                }
-            }
+            MeshLocations[name].localMatrix *= Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
+            updateTransformation(MeshLocations[name]);
+        }
+        
+        public void resetMeshRotation(string name)
+        {
+            MeshLocations[name].transformMatrix = Matrix4.Identity;
         }
 
         private void updateTransformation(Structures.Mesh mesh)
