@@ -5,7 +5,14 @@ out vec4 FragColor;
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 
+in VS_OUT {
+    vec4 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 VertexColor;
+} vs_out;
+
 void main()
 {
-	FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+	FragColor = vs_out.VertexColor;
 }

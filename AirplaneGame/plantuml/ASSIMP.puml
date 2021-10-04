@@ -1,0 +1,228 @@
+@startuml ASSIMP
+
+
+class Scene{
+    + MeshCount : int
+    + HasLights : bool
+    + LightCount : int
+    + CameraCount : int
+    + TextureCount : int
+    + AnimationCount : int
+    + MaterialCount : int
+    + SceneFlags : SceneFlags
+    + RootNode : Node
+    + Meshes : Mesh[]
+    + Lights : Light[]
+    + Cameras : Camera[]
+    + Textures : Texture[]
+    + Animations : Animation []
+    + Materials : Material []
+    + Scene()
+    + Clear() : void
+}
+
+Scene::Meshes <-- Mesh
+Scene::Lights <-- Light
+Scene::Cameras <-- Camera
+Scene::Textures <-- EmbeddedTexture
+Scene::Animations <-- Animation
+Scene::Materials <-- Material
+
+class Mesh{
+    + MaterialIndex : int <<get>> <<set>>
+    + VertexCount : int <<get>>
+    + FaceCount : int <<get>>
+    + VertexColorChannelCount : int <<get>>
+    + TextureCoordinateChannelCount : int <<get>>
+    + BoneCount : int <<get>>
+    + MeshAnimationAttachmentCount : int <<get>>
+    + Name : string 
+    + Vertices : Vector3D[] 
+    + Normals : Vector3D[]
+    + Tangents : Vector3D[]
+    + BiTangents : Vector3D[]
+    + Faces : Face[]
+    + Bones: Bone[]
+    + MeshAnimationAttachments : MeshAnimationAttachment[]
+    + Mesh(name:String)
+    + Mesh(primType:PrimitiveType)
+    + Mesh(name:String, primType:PrimitiveType)
+    + SetIndices(indices:int[], indicesPerFace:int) : bool
+    + GetIndices() : int[]
+    + GetUnsignedIndices() : uint[]
+    + GetShortIndices() : short[]
+}
+
+class Face{
+    Indicies : int[]
+    NumIndicies : int
+}
+Mesh::Faces <-- Face
+Mesh::MeshAnimationAttachments <-- MeshAnimationAttachment
+Mesh::Bones <-- Bone
+
+class MeshAnimationAttachment{
+    + VertexCount : int <<get>>
+    + VertexColorChannelCount : int <<get>>
+    + TextureCoordinateChannelCount : int <<get>>
+    + Vertices : Vector3D[] 
+    + Normals : Vector3D[] 
+    + Tangents : Vector3D[] 
+    + BiTangents : Vector3D[] 
+    + MeshAnimationAttachment()
+}
+
+class Light{
+    + AngleInnerCone : float
+    + AngleOuterCone : float 
+    + AttenuationConstant : float
+    + AttenuationLinear : float
+    + AttenuationQuadratic : float 
+    + ColorAmbient : Color3D
+    + ColorDiffuse : Color3D
+    + ColorSpecular : Color3D
+    + Direction : Vector3D
+    + Name : string 
+    + Position : Vector3D
+    + Type : LightSourceType(Enum)
+}
+
+
+class Camera{
+    + FieldOfview : float <<get>> <<set>>
+    + ClipPlaneNear : float <<get>> <<set>>
+    + ClipPlaneFar : float <<get>> <<set>>
+    + AspectRatio : float <<get>> <<set>>
+    + Name : string 
+    + Position : Vector3D
+    + Up : Vector3D
+    + Direction : Vector3D
+    + ViewMatrix : Matrix4x4
+    + Camera()
+}
+
+class EmbeddedTexture{
+    + Width : int <<get>>
+    + Height : int <<get>>
+    + NonCompressedDataSize : int <<get>>
+    + CompressedDataSize : int <<get>>
+    + CompressedFormatHint : string
+    + EmbeddedTexture()
+}
+
+class Animation{
+    + DurationInTicks : double <<get>> <<set>>
+    + TicksPerSecond : double <<get>> <<set>>
+    + NodeAnimationChannelCount : int <<get>>
+    + MeshAnimationChannelCount : int <<get>>
+    + Name : string
+    + NodeAnimationChannels : NodeAnimationChannel[]
+    + MeshAnimationChannels : MeshAnimationChannel[]
+    + Animation()    
+}
+
+Animation::NodeAnimationChannels <-- NodeAnimationChannel
+Animation::MeshAnimationChannels <-- MeshAnimationChannel
+
+class NodeAnimationChannel{
+    + PositionKeyCount : int <<get>>
+    + RotationKeyCount : int <<get>>
+    + ScalingKeyCount : int <<get>>
+
+    + NodeName : string
+    + PositionKeys : VectorKey[]
+    + RotationKeys : QuaternionKey[]
+    + ScalingKeys : VectorKey[]
+    + PreState : AnimationBehaviour
+    + PostState : AnimationBehavior
+    + NodeAnimationChannel()   
+}
+
+NodeAnimationChannel::PositionKeys <-- VectorKey
+NodeAnimationChannel::ScalingKeys <-- VectorKey
+NodeAnimationChannel::RotationKeys <-- QuaternionKey
+
+class QuaternionKey{
+    Time : double 
+    Value : Quaternion
+}
+
+class VectorKey{
+    Time : double
+    Value : Vector3D
+}
+
+class MeshAnimationChannel{
+    Keys : MeshKey[]
+    Name : string 
+    NumKeys : int
+}
+
+MeshAnimationChannel::Keys <-- MeshKey
+
+class MeshKey{
+    Time : double
+    Value : int
+}
+
+class Bone{
+    + VertexWeightCount : int <<get>>
+    + Name : string 
+    + VertexWeights : VertexWeight[]
+    + OffsetMatrix : Matrix4x4
+    + Bone()
+}
+
+Bone::VertexWeights <-- VertexWeight
+
+
+
+class VertexWeight{
+    + VertexID : int
+    + Weight : float
+}
+
+VertexWeight::Weight --> Mesh::Vertices
+
+class Material{
+    + PropertyCount : int <<get>>
+    + Opacity : float <<get>> <<set>>
+    + BumpScaling : float <<get>> <<set>>
+    + Shininess : float <<get>> <<set>>
+    + ShininessStrength : float <<get>> <<set>>
+    + Reflectivity : float <<get>> <<set>>
+    + Name : string
+    + ShadingMode : ShadingMode
+    + BlendMode : BlendMode
+    + ColorDiffuse : Color4D
+    + ColorAmbient : Color4D
+    + ColorSpecular : Color4D
+    + ColorEmissive : Color4D
+    + ColorTransparent : Color4D
+    + ColorReflective : Color4D
+    + TextureDiffuse : TextureSlot
+    + TextureSpecular : TextureSlot
+    + TextureAmbient : TextureSlot
+    + TextureEmissive : TextureSlot
+    + TextureHeight : TextureSlot
+    + TextureNormal : TextureSlot
+    + TextureOpacity : TextureSlot
+    + TextureDisplacement : TextureSlot
+    + TextureLightMap : TextureSlot
+    + TextureReflection : TextureSlot
+    + Material()
+}
+
+Material <-- TextureSlot
+
+class TextureSlot{
+    + TextureIndex : int
+    + UVIndex : int
+    + BlendFactor : float
+    + Flags : int
+}
+
+
+
+
+@enduml

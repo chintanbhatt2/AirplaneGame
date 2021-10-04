@@ -69,6 +69,8 @@ namespace AirplaneGame
 
         private Camera _camera;
 
+        private Light _lights;
+
         private bool _firstMove = true;
 
         private Vector2 _lastPos;
@@ -87,13 +89,15 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-            _stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane.dae"));
+            _stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae"));
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
 
             _shader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
+
+            _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
 
 

@@ -17,8 +17,7 @@ namespace AirplaneGame
             public Vector3 Position, Normal; 
             public Vector2 TexCoord;
             public Vector3 Tangent, Bitangent;
-            int[] m_BoneIDs;
-            float[] m_Weights;
+            public Vector4 Color;
         }
 
         public struct Texture
@@ -53,6 +52,7 @@ namespace AirplaneGame
                 setupMesh();
             }
 
+
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures)
             {
                 this.vertices = vertices;
@@ -69,18 +69,22 @@ namespace AirplaneGame
 
             private float[] getVertexArray()
             {
-                float[] varray = new float[vertices.Length*3 + vertices.Length * 3 + vertices.Length * 2];
+                float[] varray = new float[vertices.Length*12];
 
                 for (int i = 0; i < vertices.Length; i++)
                 {
-                    varray[i * 8 + 0] = vertices[i].Position.X;
-                    varray[i * 8 + 1] = vertices[i].Position.Y;
-                    varray[i * 8 + 2] = vertices[i].Position.Z;
-                    varray[i * 8 + 3] = vertices[i].Normal.X;
-                    varray[i * 8 + 4] = vertices[i].Normal.Y;
-                    varray[i * 8 + 5] = vertices[i].Normal.Z;
-                    varray[i * 8 + 6] = vertices[i].TexCoord.X;
-                    varray[i * 8 + 7] = vertices[i].TexCoord.Y;
+                    varray[i * 12 + 0] = vertices[i].Position.X;
+                    varray[i * 12 + 1] = vertices[i].Position.Y;
+                    varray[i * 12 + 2] = vertices[i].Position.Z;
+                    varray[i * 12 + 3] = vertices[i].Normal.X;
+                    varray[i * 12 + 4] = vertices[i].Normal.Y;
+                    varray[i * 12 + 5] = vertices[i].Normal.Z;
+                    varray[i * 12 + 6] = vertices[i].TexCoord.X;
+                    varray[i * 12 + 7] = vertices[i].TexCoord.Y;
+                    varray[i * 12 + 8] = vertices[i].Color.X;
+                    varray[i * 12 + 9] = vertices[i].Color.Y;
+                    varray[i * 12 + 10] = vertices[i].Color.Z;
+                    varray[i * 12 + 11] = vertices[i].Color.W;
                 }
                 return varray;
             }
@@ -107,15 +111,19 @@ namespace AirplaneGame
 
                 //positions
                 GL.EnableVertexAttribArray(0);
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12 * sizeof(float), 0);
 
                 //normals
                 GL.EnableVertexAttribArray(1);
-                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), sizeof(float) * 3);
+                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 12 * sizeof(float), sizeof(float) * 3);
 
                 //tex coords
                 GL.EnableVertexAttribArray(2);
-                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), sizeof(float) * 6);
+                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 12 * sizeof(float), sizeof(float) * 6);
+
+                //vertex color
+                GL.EnableVertexAttribArray(3);
+                GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, 12 * sizeof(float), sizeof(float) * 8);
 
                 GL.BindVertexArray(0);
             }

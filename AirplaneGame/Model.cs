@@ -133,6 +133,23 @@ namespace AirplaneGame
                     vertex.Normal = vector;
                 }
 
+                switch(mesh.VertexColorChannelCount)
+                {
+                    case 0:
+                        vertex.Color = new Vector4(0.5f);
+                        break;
+                    case 1:
+                        vertex.Color = new Vector4(mesh.VertexColorChannels[0][i].R, mesh.VertexColorChannels[0][i].G, mesh.VertexColorChannels[0][i].B, mesh.VertexColorChannels[0][i].A);
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+
+                }
+
                 if (mesh.HasTextureCoords(0))
                 {
                     Vector2 vec;

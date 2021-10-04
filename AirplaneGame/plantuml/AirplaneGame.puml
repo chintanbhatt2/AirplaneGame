@@ -1,0 +1,171 @@
+@startuml AirplaneGame
+class Animation {
+    + Duration : double <<get>>
+    + TicksPerSecond : double <<get>>
+    + RootNode : AssimpNodeData
+    + BoneInfoDict : Dictionary<string, Model.BoneInfo>
+    + transformation : Matrix4
+    + Bones : Bone[]
+    + Animation()
+    + Animation(animationPath:string, model:Model)
+    + FindBone(name:string) : Bone
+}
+Animation::Bones --> Bone
+class AssimpNodeData <<struct>> {
+    + name : string <<get>> <<set>>
+    + childrenCount : int <<get>> <<set>>
+    + AssimpNodeData : AssimpNodeData[]
+
+}
+
+Animation::RootNode <-- AssimpNodeData
+class Animator {
+    + FinalBoneMatricies : Matrix4[]
+    + Animator(animation:Animation)
+    + UpdateAnimation(dt:double) : void
+    + PlayAnimation(pAnimation:Animation) : void
+    + CalculateBoneTransform(node:Animation.AssimpNodeData, parentTransform:Matrix4) : void
+}
+
+class Bone {
+    + Name : string <<get>>
+    + ID : float <<get>>
+    + LocalTransform : Matrix4
+    + Bone(name:string, ID:float, channel:NodeAnimationChannel)
+    + Update(animationTime:double) : void
+    + GetRotationIndex(animationTime:double) : int
+    + GetScaleIndex(animationTime:double) : int
+    + GetPositionIndex(animationTime:double) : int
+    InterpolatePosition(animationTime:double) : OpenTK.Mathematics.Matrix4
+    InterpolateRotation(animationTime:double) : OpenTK.Mathematics.Matrix4
+    InterpolateScaling(animationTime:double) : OpenTK.Mathematics.Matrix4
+}
+class KeyPosition <<struct>> {
+    + timeStamp : double
+    + position : Vector3
+}
+class KeyRotation <<struct>> {
+    + timeStamp : double
+    + rotation : Vector3
+}
+class KeyScale <<struct>> {
+    + timeStamp : double
+    + scale : Vector3
+}
+Bone  <-- KeyPosition
+Bone  <-- KeyRotation
+Bone  <-- KeyScale
+class Camera {
+    + Camera(position:Vector3, aspectRatio:float)
+    + AspectRatio : float <<set>>
+    + MouseSensitivity : float <<get>> <<set>>
+    + MovementSpeed : float <<get>> <<set>>
+    + Zoom : float <<get>> <<set>>
+    + Pitch : float <<get>> <<set>>
+    + Yaw : float <<get>> <<set>>
+    + Fov : float <<get>> <<set>>
+    + Position : Vector3
+    + Front : Vector3
+    + Up : Vector3
+    + Right : Vector3
+    + GetViewMatrix() : Matrix4
+    + GetProjectionMatrix() : Matrix4
+}
+class Model {
+    + directory : string
+    + gammaCorrection : bool = false
+    + m_BoneCounter : int = 0
+    + boneInfoDict : Dictionary<string, BoneInfo>
+    + offset : Matrix4
+    + meshes : Structures.Meshes[]
+    + Model(path:string)
+    + Draw(shader:Shader) : void
+}
+
+class BoneInfo <<struct>> {
+    + id : float <<get>> <<set>>
+    + offset : Matrix4
+}
+
+Model::boneInfoDict  <-- BoneInfo
+class Program <<static>> {
+    nativeWindowSettings : NativeWindowSettings
+    window : Window
+}
+class Shader {
+    + <<readonly>> Handle : int
+    + Shader(vertPath:string, fragPath:string)
+    + Use() : void
+    + GetAttribLocation(attribName:string) : int
+    + SetInt(name:string, data:int) : void
+    + SetFloat(name:string, data:float) : void
+    + SetMatrix4(name:string, data:Matrix4) : void
+    + SetVector3(name:string, data:Vector3) : void
+}
+
+package Structures {
+class Vertex {
+    + Position  : Vector3
+    + Normal    : Vector3
+    + TexCoord  : Vector2
+    + Tangent   : Vector3
+    + Bitangent : Vector3
+}
+class Texture <<struct>> {
+    + id : int
+    + type : string
+    + path : string
+}
+
+class Mesh {
+    - VAO : VertexArrayObject
+    - VBO : VertexBufferArray
+    - EBO : ElementBufferObject
+    + transformMatrix : Matrix4
+    + vertices : Vertex[]
+    + indicies : int[]
+    + textures : Texture[]
+    + Mesh(vertices:Vertex[], indicies:int[], textures:Texture[])
+    + Draw(shader:Shader) : void
+    - setupMesh()
+}
+
+}
+
+Mesh::Draw <-- Model::Draw
+Mesh::vertices <-- Vertex
+Mesh::textures <-- Texture
+
+
+class Texture {
+    + <<readonly>> Handle : int
+    + {static} LoadFromFile(path:string) : Texture
+    + Texture(glHandle:int)
+    + Use(unit:TextureUnit) : void
+}
+class Window {
+    + shader : Shader
+    + camera : Camera
+    + firstMove : bool
+    + lastPos : Vector2
+    + time : double
+    - scaleFactor : float
+    - animator : animation
+    + models : Model[]
+    + animations : Animation[]
+    + Window(gameWindowSettings:GameWindowSettings, nativeWindowSettings:NativeWindowSettings)
+    + OnLoad()
+    + OnRenderFrame(FrameEventArgs)
+    + OnUpdateFrame(FrameEventArgs)
+    + OnMouseWheel(MouseWheelEventArgs)
+    + OnResize(ResizeEventArgs)
+}
+
+Window::models <-- Model
+Window::animations <-- Animation
+Model::meshes <-- Mesh
+Program --> Window
+Window::shader <-- Shader
+Window::camera <-- Camera
+Animator::Animator <-- Animation
+@enduml
