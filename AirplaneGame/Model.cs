@@ -47,9 +47,82 @@ namespace AirplaneGame
             updateTransformation(RootMesh);
         }
 
+
+        public Matrix4 getModelTransform()
+        {
+            return ModelTransform;
+        }
+
+        public OpenTK.Mathematics.Quaternion getRotationVector()
+        {
+            return rotationVector;
+        }
+        public void lockMeshRotation(bool x, bool y, bool z, string name)
+        {
+            if (x)
+            {
+                MeshLocations[name].RotationLock.X = 1.0f;
+            }
+            if (y)
+            {
+                MeshLocations[name].RotationLock.Y = 1.0f;
+            }
+            if (z)
+            {
+                MeshLocations[name].RotationLock.Z = 1.0f;
+            }
+        }
+
         public void rotateMesh(float xRotation, float yRotation, float zRotation, string name)
         {
-            MeshLocations[name].localMatrix *= Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
+            Matrix4 xRot = Matrix4.Identity, yRot = Matrix4.Identity, zRot = Matrix4.Identity, totalRotation = Matrix4.Identity;
+
+            if (MeshLocations[name].RotationLock.X == 0)
+            {
+                Matrix4.CreateRotationX(xRotation, out xRot);
+
+            }
+            if (MeshLocations[name].RotationLock.Y == 0)
+            {
+                Matrix4.CreateRotationY(yRotation, out yRot);
+
+            }
+            if (MeshLocations[name].RotationLock.Z == 0)
+            {
+                Matrix4.CreateRotationZ(zRotation, out zRot);
+            }
+
+            totalRotation = xRot * yRot * zRot;
+
+
+            MeshLocations[name].localMatrix *= totalRotation;
+            updateTransformation(MeshLocations[name]);
+        }
+
+        public void setMeshAngle(Vector3 eulerAngles, string name)
+        {
+            Matrix4 xRot = new Matrix4(), yRot = Matrix4.Identity, zRot = Matrix4.Identity, totalRotation = Matrix4.Identity;
+
+            if (MeshLocations[name].RotationLock.X == 0)
+            {
+                Matrix4.CreateRotationX(eulerAngles.X, out xRot);
+
+            }
+            if (MeshLocations[name].RotationLock.Y == 0)
+            {
+                Matrix4.CreateRotationY(eulerAngles.Y, out yRot);
+
+            }
+            if (MeshLocations[name].RotationLock.Z == 0)
+            {
+                Matrix4.CreateRotationZ(eulerAngles.Z, out zRot);
+            }
+
+            totalRotation = xRot * yRot * zRot;
+            totalRotation.Normalize();
+
+            totalRotation.Column3 = MeshLocations[name].localMatrix.Column3;
+            MeshLocations[name].localMatrix = totalRotation;
             updateTransformation(MeshLocations[name]);
         }
         

@@ -39,6 +39,7 @@ namespace AirplaneGame
             public Mesh Parent;
             public List<Mesh> Children = new List<Mesh>();
             public string Name;
+            public Vector3 RotationLock = new Vector3(0);
 
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures, ref Mesh parent)
             {
@@ -89,6 +90,10 @@ namespace AirplaneGame
                 return varray;
             }
 
+            private void setBufferSubData()
+            {
+            }
+
             private void setupMesh() //TODO: update code for C# reference based
             {
                 VAO = GL.GenVertexArray();
@@ -121,7 +126,7 @@ namespace AirplaneGame
                 GL.EnableVertexAttribArray(2);
                 GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 12 * sizeof(float), sizeof(float) * 6);
 
-                //vertex color
+                //vertex colors
                 GL.EnableVertexAttribArray(3);
                 GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, 12 * sizeof(float), sizeof(float) * 8);
 

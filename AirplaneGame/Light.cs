@@ -52,6 +52,12 @@ namespace AirplaneGame
             Name = light.Name;
 
         }
+
+        public void Draw(Shader shader)
+        {
+            shader.SetVector3("lightColor", ColorDiffuse);
+            
+        }
         
     }
 }

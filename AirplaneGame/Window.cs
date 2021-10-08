@@ -65,7 +65,7 @@ namespace AirplaneGame
             1, 2, 3
         };
 
-        private Shader _shader;
+        private Shader ObjectShader, LightingShader;
 
         private Camera _camera;
 
@@ -95,8 +95,8 @@ namespace AirplaneGame
 
             GL.Enable(EnableCap.DepthTest);
 
-            _shader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
-
+            ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
+            //LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
 
@@ -104,6 +104,8 @@ namespace AirplaneGame
             _camera = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             _camera.Pitch = -13.799696f;
             _camera.Yaw = -270.1763f;
+            _stls[0].lockMeshRotation(true, true, false, "Airo1_-_Propeller-2");    
+            _stls[0].lockMeshRotation(false, true, true, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
 
             CursorGrabbed = true;
         }
@@ -120,18 +122,21 @@ namespace AirplaneGame
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            //_shader.Use();
 
-            
+            //LightingShader.SetMatrix4("view", _camera.GetViewMatrix());
+            //LightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+
+            //_lights.Draw(LightingShader);
 
 
-            _shader.SetMatrix4("view", _camera.GetViewMatrix());
-            _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            ObjectShader.SetMatrix4("view", _camera.GetViewMatrix());
+            ObjectShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
 
             foreach (Model x in _stls)
             {
-                x.Draw(_shader);
+                ObjectShader.Use();
+                x.Draw(ObjectShader);
             }
 
             SwapBuffers();
@@ -142,7 +147,16 @@ namespace AirplaneGame
             base.OnUpdateFrame(e);
 
             //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, _stls[0].rotationVector);
-            _stls[0].rotateMesh(0.1f, 0, 0, "Airo1_-_Propeller-2");
+            _stls[0].rotateMesh(0.0f, 0.0f, 0.001f, "Airo1_-_Propeller-2");
+
+            Matrix4 modelRotation = _stls[0].getModelTransform();
+            Quaternion rotationQuat = _stls[0].getRotationVector();
+            Vector3 euAngles = rotationQuat.ToEulerAngles();
+            if (euAngles.X > MathHelper.DegreesToRadians(45))
+            {
+                _stls[0].setMeshAngle(euAngles, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
+
+            }
 
 
             if (!IsFocused)
