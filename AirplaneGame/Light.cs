@@ -55,8 +55,8 @@ namespace AirplaneGame
 
         public void SetLightUniforms(Shader shader)
         {
-            shader.SetVector3("lightColor", ColorDiffuse);
-            shader.SetVector3("lightPos", Position);
+            shader.SetVector3("light.Ambient", ColorAmbient);
+            shader.SetVector3("light.Position", Position);
         }
         
     }
