@@ -123,26 +123,15 @@ namespace AirplaneGame
             base.OnRenderFrame(e);
 
             _time += 4.0 * e.Time;
-            GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            GL.ClearColor(.5f, .50f, .50f, .50f);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
-            //LightingShader.SetMatrix4("view", _camera.GetViewMatrix());
-            //LightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-
-            //_lights.SetLightColor(LightingShader);
-
-
             ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
             ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            ObjectShader.SetVector3("ViewPosition", Cam.Position);
             _lights.SetLightUniforms(ObjectShader);
-
-            //foreach (Model x in _stls)
-            //{
-            //    ObjectShader.Use();
-            //    x.Draw(ObjectShader);
-            //}
 
             ObjectShader.Use();
             plane.Draw(ObjectShader);

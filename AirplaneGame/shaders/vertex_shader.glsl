@@ -9,7 +9,7 @@ out vec2 texCoord;
 
 
 out VS_OUT {
-    vec4 FragPos;
+    vec3 FragPos;
     vec3 Normal;
     vec2 TexCoords;
     vec4 VertexColor;
@@ -26,7 +26,7 @@ void main(void)
         vs_out.VertexColor = aVertexColor;
         vec4 newPos = model * vec4(aPosition, 1.0) ;
 
-        vs_out.FragPos = newPos;
+        vs_out.FragPos = vec3(newPos);
         vs_out.Normal = aNormal;
         gl_Position = newPos * view * projection;
 }

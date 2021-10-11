@@ -48,15 +48,29 @@ namespace AirplaneGame
             ColorDiffuse = new Vector3(light.ColorDiffuse.R, light.ColorDiffuse.G, light.ColorDiffuse.B);
             ColorSpecular = new Vector3(light.ColorSpecular.R, light.ColorSpecular.G, light.ColorSpecular.B);
             Direction = new Vector3(light.Direction.X, light.Direction.Y, light.Direction.Z);
-            Position = new Vector3(light.Position.X, light.Position.Y, light.Position.Z);
+            //Position = new Vector3(light.Position.X, light.Position.Y, light.Position.Z);
+            Position = new Vector3(3, 3, 3);
             Name = light.Name;
 
         }
 
         public void SetLightUniforms(Shader shader)
         {
-            shader.SetVector3("light.Ambient", ColorAmbient);
+            shader.SetVector3("light.Ambient", new Vector3(0.2f));
+            shader.SetVector3("light.Diffuse", ColorDiffuse);
+            shader.SetVector3("light.Specular", ColorSpecular);
+
             shader.SetVector3("light.Position", Position);
+            shader.SetVector3("light.Direction", Direction);
+
+            shader.SetFloat("light.CutOff", (float)AngleInnerCone);
+            shader.SetFloat("light.OuterCutOff", (float)AngleOuterCone);
+
+            shader.SetFloat("light.Constant", (float)AttenuationConstant);
+            shader.SetFloat("light.Linear", (float)AttenuationLinear);
+            shader.SetFloat("light.Quadratic", (float)AttentionQuadratic);
+
+            
         }
         
     }
