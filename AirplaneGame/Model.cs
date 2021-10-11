@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Assimp;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Assimp;
-using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL4;
 
 
 namespace AirplaneGame
@@ -18,7 +15,7 @@ namespace AirplaneGame
         }
         public void Draw(Shader shader)
         {
-            for(int i = 0; i < meshes.Count; i++)
+            for (int i = 0; i < meshes.Count; i++)
             {
                 meshes[i].Draw(shader);
             }
@@ -30,16 +27,16 @@ namespace AirplaneGame
         public string directory;
         public bool gammaCorrection = false;
         public OpenTK.Mathematics.Quaternion rotationVector = new OpenTK.Mathematics.Quaternion(new Vector3(0, 0, 0));
-        private Vector3 position = new Vector3(0f);
-        private Vector3 scale = new Vector3(1);
-        private Structures.Mesh RootMesh;
-        private Matrix4 ModelTransform = Matrix4.Identity;
-        private Dictionary<string, Structures.Mesh> MeshLocations = new Dictionary<string, Structures.Mesh>();
+        protected Vector3 position = new Vector3(0f);
+        protected Vector3 scale = new Vector3(1);
+        protected Structures.Mesh RootMesh;
+        protected Matrix4 ModelTransform = Matrix4.Identity;
+        protected Dictionary<string, Structures.Mesh> MeshLocations = new Dictionary<string, Structures.Mesh>();
 
-        
+
         public void rotateModel(float xRotation, float yRotation, float zRotation)
         {
-            rotationVector =  new OpenTK.Mathematics.Quaternion( MathHelper.DegreesToRadians(xRotation), MathHelper.DegreesToRadians(yRotation), MathHelper.DegreesToRadians(zRotation));
+            rotationVector = new OpenTK.Mathematics.Quaternion(MathHelper.DegreesToRadians(xRotation), MathHelper.DegreesToRadians(yRotation), MathHelper.DegreesToRadians(zRotation));
             ModelTransform = Matrix4.CreateFromQuaternion(rotationVector) * Matrix4.CreateTranslation(position) * Matrix4.CreateScale(scale);
             rotationVector.Normalize();
 
@@ -125,13 +122,13 @@ namespace AirplaneGame
             MeshLocations[name].localMatrix = totalRotation;
             updateTransformation(MeshLocations[name]);
         }
-        
+
         public void resetMeshRotation(string name)
         {
             MeshLocations[name].transformMatrix = Matrix4.Identity;
         }
 
-        private void updateTransformation(Structures.Mesh mesh)
+        protected void updateTransformation(Structures.Mesh mesh)
         {
 
             if (mesh.Parent != null)
@@ -148,19 +145,19 @@ namespace AirplaneGame
             }
 
         }
-        private void loadModel(string path)
+        protected void loadModel(string path)
         {
             var context = new Assimp.AssimpContext();
             Scene aiScene = context.ImportFile(path, PostProcessSteps.Triangulate | PostProcessSteps.FlipUVs);
 
             directory = path.Substring(0, path.LastIndexOf(@"\"));
-            
+
             processNode(aiScene.RootNode, aiScene);
             RootMesh = meshes[0];
         }
-        private void processNode(Node node, Scene scene)
+        protected void processNode(Node node, Scene scene)
         {
-            for(int i = 0; i < node.MeshCount; i++)
+            for (int i = 0; i < node.MeshCount; i++)
             {
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
 
@@ -173,20 +170,20 @@ namespace AirplaneGame
                 }
             }
 
-            for(int i = 0; i < node.ChildCount; i++)
+            for (int i = 0; i < node.ChildCount; i++)
             {
                 processNode(node.Children[i], scene);
 
             }
         }
 
-        private Structures.Mesh processMesh(Mesh mesh, Scene scene, Node node)
+        protected Structures.Mesh processMesh(Mesh mesh, Scene scene, Node node)
         {
             List<Structures.Vertex> vertices = new List<Structures.Vertex>();
             List<int> indicies = new List<int>();
             List<Structures.Texture> textures = new List<Structures.Texture>();
 
-            for(int i = 0; i < mesh.VertexCount; i++)
+            for (int i = 0; i < mesh.VertexCount; i++)
             {
                 Structures.Vertex vertex = new Structures.Vertex();
                 Vector3 vector;
@@ -206,7 +203,7 @@ namespace AirplaneGame
                     vertex.Normal = vector;
                 }
 
-                switch(mesh.VertexColorChannelCount)
+                switch (mesh.VertexColorChannelCount)
                 {
                     case 0:
                         vertex.Color = new Vector4(0.5f);
@@ -231,7 +228,7 @@ namespace AirplaneGame
                     vec.Y = mesh.TextureCoordinateChannels.ElementAt(0).ElementAt(i).Y;
                     vertex.TexCoord = vec;
 
-                    if(!(mesh.Tangents.Count == 0))
+                    if (!(mesh.Tangents.Count == 0))
                     {
                         vector.X = mesh.Tangents[i].X;
                         vector.Y = mesh.Tangents[i].Y;
@@ -285,7 +282,7 @@ namespace AirplaneGame
             returnMesh.localMatrix = convertASSIMPtoOpenGLMat(node.Transform);
             while (node.Parent != null && node.Parent.Name != "Scene")
             {
-                assimpTransform = assimpTransform * node.Parent.Transform ;
+                assimpTransform = assimpTransform * node.Parent.Transform;
                 node = node.Parent;
             }
             node = previousNode;
@@ -294,19 +291,19 @@ namespace AirplaneGame
             return returnMesh;
         }
 
-        private Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)
+        protected Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)
         {
             //  It's ugly but what can you do ¯\_(ツ)_/¯
-            return new Matrix4( assimp.A1, assimp.A2, assimp.A3, assimp.A4,
+            return new Matrix4(assimp.A1, assimp.A2, assimp.A3, assimp.A4,
                                 assimp.B1, assimp.B2, assimp.B3, assimp.B4,
                                 assimp.C1, assimp.C2, assimp.C3, assimp.C4,
                                 assimp.D1, assimp.D2, assimp.D3, assimp.D4);
         }
 
-        private Structures.Texture[] loadMaterialTextures(Material mat, TextureType type, string typeName)
+        protected Structures.Texture[] loadMaterialTextures(Material mat, TextureType type, string typeName)
         {
             List<Structures.Texture> textures = new List<Structures.Texture>();
-            for(int i = 0; i < mat.GetMaterialTextureCount(type); i++)
+            for (int i = 0; i < mat.GetMaterialTextureCount(type); i++)
             {
                 TextureSlot str;
                 mat.GetMaterialTexture(type, i, out str);
@@ -314,7 +311,7 @@ namespace AirplaneGame
                 bool skip = false;
                 for (int j = 0; j < textures_loaded.Length; j++)
                 {
-                    if(textures_loaded[j].path == null)
+                    if (textures_loaded[j].path == null)
                     {
                         textures.Add(textures_loaded[j]);
                         skip = true;
@@ -322,7 +319,7 @@ namespace AirplaneGame
                     }
                 }
 
-                if(!skip)
+                if (!skip)
                 {
                     //TODO: Fix this
                 }
@@ -333,19 +330,19 @@ namespace AirplaneGame
             return textures.ToArray();
         }
 
-        private int LoadTextureFromFile(string path, string directory, bool gamma)
+        protected int LoadTextureFromFile(string path, string directory, bool gamma)
         {
             string filename = path;
             filename = directory + '/' + filename;
 
             int textureID;
             textureID = GL.GenTexture();
-            
+
 
             int width = 0, height = 0, nrComponents = 0;
             byte[] data = { };
-            
-            using (var ms = new System.IO.MemoryStream() )
+
+            using (var ms = new System.IO.MemoryStream())
             {
                 System.Drawing.Image imin = System.Drawing.Image.FromFile(path);
                 imin.Save(ms, imin.RawFormat);
@@ -364,7 +361,7 @@ namespace AirplaneGame
                     iformat = PixelInternalFormat.R16f;
                     format = PixelFormat.Red;
                 }
-                    
+
                 else if (nrComponents == 3)
                 {
                     iformat = PixelInternalFormat.Rgb;
@@ -395,6 +392,15 @@ namespace AirplaneGame
             }
 
             return textureID;
+        }
+    }
+
+    public class Armature
+    {
+        public Dictionary<string, Structures.Mesh> MeshDictionary = new Dictionary<string, Structures.Mesh>();
+        public Armature(List<Structures.Mesh> Dependencies, Dictionary<string, Structures.Mesh> meshDict)
+        {
+            MeshDictionary = meshDict;
         }
     }
 }

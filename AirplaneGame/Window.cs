@@ -67,17 +67,19 @@ namespace AirplaneGame
 
         private Shader ObjectShader, LightingShader;
 
-        private Camera _camera;
+        private Camera Cam;
 
         private Light _lights;
 
-        private bool _firstMove = true;
+        private bool FirstMove = true;
 
-        private Vector2 _lastPos;
+        private Vector2 LastPos;
 
         private double _time;
 
         public List<Model> _stls = new List<Model>();
+
+        public Airplane plane;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -89,23 +91,26 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-            _stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae"));
+            //_stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae"));
+
+            plane = new Airplane(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
             GL.Enable(EnableCap.DepthTest);
 
-            ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
-            //LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
+            //ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
+            ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
+            LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
 
 
-            _camera = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
-            _camera.Pitch = -13.799696f;
-            _camera.Yaw = -270.1763f;
-            _stls[0].lockMeshRotation(true, true, false, "Airo1_-_Propeller-2");    
-            _stls[0].lockMeshRotation(false, true, true, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
+            Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
+            Cam.Pitch = -13.799696f;
+            Cam.Yaw = -270.1763f;
+            plane.lockMeshRotation(true, true, false, "Airo1_-_Propeller-2");
+            plane.lockMeshRotation(false, true, true, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
 
             CursorGrabbed = true;
         }
@@ -126,18 +131,21 @@ namespace AirplaneGame
             //LightingShader.SetMatrix4("view", _camera.GetViewMatrix());
             //LightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-            //_lights.Draw(LightingShader);
+            //_lights.SetLightColor(LightingShader);
 
 
-            ObjectShader.SetMatrix4("view", _camera.GetViewMatrix());
-            ObjectShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+            ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
+            ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            _lights.SetLightUniforms(ObjectShader);
 
+            //foreach (Model x in _stls)
+            //{
+            //    ObjectShader.Use();
+            //    x.Draw(ObjectShader);
+            //}
 
-            foreach (Model x in _stls)
-            {
-                ObjectShader.Use();
-                x.Draw(ObjectShader);
-            }
+            ObjectShader.Use();
+            plane.Draw(ObjectShader);
 
             SwapBuffers();
         }
@@ -146,15 +154,15 @@ namespace AirplaneGame
         {
             base.OnUpdateFrame(e);
 
-            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, _stls[0].rotationVector);
-            _stls[0].rotateMesh(0.0f, 0.0f, 0.001f, "Airo1_-_Propeller-2");
+            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, plane.rotationVector);
+            plane.rotateMesh(0.0f, 0.0f, 0.001f, "Airo1_-_Propeller-2");
 
-            Matrix4 modelRotation = _stls[0].getModelTransform();
-            Quaternion rotationQuat = _stls[0].getRotationVector();
+            Matrix4 modelRotation = plane.getModelTransform();
+            Quaternion rotationQuat = plane.getRotationVector();
             Vector3 euAngles = rotationQuat.ToEulerAngles();
             if (euAngles.X > MathHelper.DegreesToRadians(45))
             {
-                _stls[0].setMeshAngle(euAngles, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
+                plane.setMeshAngle(euAngles, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
 
             }
 
@@ -177,58 +185,58 @@ namespace AirplaneGame
             {
                 if (input.IsKeyDown(Keys.W))
                 {
-                    _stls[0].rotateModel(-0.001f, 0, 0);
+                    plane.rotateModel(-0.001f, 0, 0);
                 }
 
                 if (input.IsKeyDown(Keys.S))
                 {
-                    _stls[0].rotateModel(0.001f, 0, 0);
+                    plane.rotateModel(0.001f, 0, 0);
                 }
                 if (input.IsKeyDown(Keys.A))
                 {
-                    _stls[0].rotateModel(0, 0.001f, 0);
+                    plane.rotateModel(0, 0.001f, 0);
                 }
                 if (input.IsKeyDown(Keys.D))
                 {
-                    _stls[0].rotateModel(0, -0.001f, 0);
+                    plane.rotateModel(0, -0.001f, 0);
                 }
 
                 if (input.IsKeyDown(Keys.Q))
                 {
-                    _stls[0].rotateModel(0, 0, 0.001f);
+                    plane.rotateModel(0, 0, 0.001f);
                 }
                 if (input.IsKeyDown(Keys.E))
                 {
-                    _stls[0].rotateModel(0, 0, -0.001f);
+                    plane.rotateModel(0, 0, -0.001f);
                 }
             }
             else
             {
                 if (input.IsKeyDown(Keys.W))
                 {
-                    _camera.Position += _camera.Front * cameraSpeed * (float)e.Time;
+                    Cam.Position += Cam.Front * cameraSpeed * (float)e.Time;
                 }
 
                 if (input.IsKeyDown(Keys.S))
                 {
-                    _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time;
+                    Cam.Position -= Cam.Front * cameraSpeed * (float)e.Time;
                 }
                 if (input.IsKeyDown(Keys.A))
                 {
-                    _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time;
+                    Cam.Position -= Cam.Right * cameraSpeed * (float)e.Time;
                 }
                 if (input.IsKeyDown(Keys.D))
                 {
-                    _camera.Position += _camera.Right * cameraSpeed * (float)e.Time;
+                    Cam.Position += Cam.Right * cameraSpeed * (float)e.Time;
                 }
                 if (input.IsKeyDown(Keys.Space))
 
                 {
-                    _camera.Position += _camera.Up * cameraSpeed * (float)e.Time;
+                    Cam.Position += Cam.Up * cameraSpeed * (float)e.Time;
                 }
                 if (input.IsKeyDown(Keys.LeftShift))
                 {
-                    _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time;
+                    Cam.Position -= Cam.Up * cameraSpeed * (float)e.Time;
                 }
             }
  
@@ -245,19 +253,19 @@ namespace AirplaneGame
             
             var mouse = MouseState;
 
-            if (_firstMove) 
+            if (FirstMove) 
             {
-                _lastPos = new Vector2(mouse.X, mouse.Y);
-                _firstMove = false;
+                LastPos = new Vector2(mouse.X, mouse.Y);
+                FirstMove = false;
             }
             else
             {
-                var deltaX = mouse.X - _lastPos.X;
-                var deltaY = mouse.Y - _lastPos.Y;
-                _lastPos = new Vector2(mouse.X, mouse.Y);
+                var deltaX = mouse.X - LastPos.X;
+                var deltaY = mouse.Y - LastPos.Y;
+                LastPos = new Vector2(mouse.X, mouse.Y);
 
-                _camera.Yaw += deltaX * sensitivity;
-                _camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
+                Cam.Yaw += deltaX * sensitivity;
+                Cam.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
             }
         }
 
@@ -266,7 +274,7 @@ namespace AirplaneGame
         {
             base.OnMouseWheel(e);
 
-            _camera.Fov -= e.OffsetY;
+            Cam.Fov -= e.OffsetY;
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -274,7 +282,7 @@ namespace AirplaneGame
             base.OnResize(e);
 
             GL.Viewport(0, 0, Size.X, Size.Y);
-            _camera.AspectRatio = Size.X / (float)Size.Y;
+            Cam.AspectRatio = Size.X / (float)Size.Y;
         }
     }
 }
