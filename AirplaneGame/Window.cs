@@ -105,7 +105,6 @@ namespace AirplaneGame
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
 
-
             Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             Cam.Pitch = -13.799696f;
             Cam.Yaw = -270.1763f;
@@ -130,7 +129,6 @@ namespace AirplaneGame
 
             ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
             ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
-            ObjectShader.SetVector3("ViewPosition", Cam.Position);
             _lights.SetLightUniforms(ObjectShader);
 
             ObjectShader.Use();

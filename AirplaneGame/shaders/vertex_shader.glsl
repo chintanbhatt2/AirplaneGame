@@ -5,9 +5,6 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec4 aVertexColor;
 
-out vec2 texCoord;
-
-
 out VS_OUT {
     vec3 FragPos;
     vec3 Normal;
@@ -27,6 +24,6 @@ void main(void)
         vec4 newPos = model * vec4(aPosition, 1.0) ;
 
         vs_out.FragPos = vec3(newPos);
-        vs_out.Normal = aNormal;
+        vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
         gl_Position = newPos * view * projection;
 }

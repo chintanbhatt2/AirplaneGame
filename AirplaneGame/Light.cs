@@ -60,7 +60,7 @@ namespace AirplaneGame
             shader.SetVector3("light.Diffuse", ColorDiffuse);
             shader.SetVector3("light.Specular", ColorSpecular);
 
-            shader.SetVector3("light.Position", Position);
+            shader.SetVector3("light.Position", new Vector3(30f, 30f, 0f));
             shader.SetVector3("light.Direction", Direction);
 
             shader.SetFloat("light.CutOff", (float)AngleInnerCone);
