@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AirplaneGame
 {
@@ -14,6 +11,16 @@ namespace AirplaneGame
         public Terrain(string path) : base(path)
         {
 
+        }
+
+        protected void GenerateNoiseMap(int seed)
+        {
+            
+        }
+
+        public Structures.Mesh GetLocationMesh(float x, float y)
+        {
+            return null;
         }
 
     }

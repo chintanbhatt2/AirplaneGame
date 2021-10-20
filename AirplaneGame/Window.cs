@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -80,6 +80,10 @@ namespace AirplaneGame
         public List<Model> _stls = new List<Model>();
 
         public Airplane plane;
+        public Shader SkyboxShader;
+
+
+        Skybox skybox;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -102,15 +106,16 @@ namespace AirplaneGame
             //ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
             ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
+            SkyboxShader = new Shader(@"..\..\..\..\shaders\skybox_vertex.glsl", @"..\..\..\..\shaders\skybox_fragment.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
-
+       
 
             Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             Cam.Pitch = -13.799696f;
             Cam.Yaw = -270.1763f;
             plane.lockMeshRotation(true, true, false, "Airo1_-_Propeller-2");
             plane.lockMeshRotation(false, true, true, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
-
+            skybox = new Skybox(Directory.GetFiles(@"..\..\..\..\resources\skybox\daylight"));
             CursorGrabbed = true;
         }
             
@@ -127,12 +132,21 @@ namespace AirplaneGame
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
+
             ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
             ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
             _lights.SetLightUniforms(ObjectShader);
 
             ObjectShader.Use();
-            plane.Draw(ObjectShader);
+
+            GL.Disable(EnableCap.DepthTest);
+            ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            SkyboxShader.SetMatrix4("view", Cam.GetViewMatrix().ClearTranslation());
+            skybox.Draw(SkyboxShader);
+            GL.Enable(EnableCap.DepthTest);
+
+            _lights.DrawLight(ObjectShader);
+            //plane.Draw(ObjectShader);
 
             SwapBuffers();
         }

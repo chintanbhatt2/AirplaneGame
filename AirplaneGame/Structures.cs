@@ -137,7 +137,6 @@ namespace AirplaneGame
                 int diffuseNo = 1;
                 int specularNo = 1;
                 shader.SetMatrix4("model", transformMatrix);
-                //TODO: Figure out how to set transform matrix
                 for(int i = 0; i < textures.Length; i++)
                 {
                     GL.ActiveTexture(TextureUnit.Texture0 + 1);

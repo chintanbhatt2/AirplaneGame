@@ -13,6 +13,9 @@ namespace AirplaneGame
         Vector3 Direction, Position;
         string Name;
         LightSourceType Type;
+        PrimativeObjects.Cone sphere = new PrimativeObjects.Cone(@"..\..\..\..\Blender Objects\Cone.dae");
+        
+        
 
         public Light(Assimp.Light light)
         {
@@ -22,12 +25,13 @@ namespace AirplaneGame
             AttenuationConstant = light.AttenuationConstant;
             AttenuationLinear = light.AttenuationLinear;
             AttentionQuadratic = light.AttenuationQuadratic;
-            ColorAmbient = new Vector3(light.ColorAmbient.R, light.ColorAmbient.G, light.ColorAmbient.B);
-            ColorDiffuse = new Vector3(light.ColorDiffuse.R, light.ColorDiffuse.G, light.ColorDiffuse.B);
-            ColorSpecular = new Vector3(light.ColorSpecular.R, light.ColorSpecular.G, light.ColorSpecular.B);
+            ColorAmbient = new Vector3(light.ColorAmbient.R/100, light.ColorAmbient.G / 100, light.ColorAmbient.B / 100);
+            ColorDiffuse = new Vector3(light.ColorDiffuse.R / 100, light.ColorDiffuse.G / 100, light.ColorDiffuse.B / 100);
+            ColorSpecular = new Vector3(light.ColorSpecular.R / 100, light.ColorSpecular.G / 100, light.ColorSpecular.B / 100);
             Direction = new Vector3(light.Direction.X, light.Direction.Y, light.Direction.Z);
             Name = light.Name;
             Position = new Vector3(light.Position.X, light.Position.Y, light.Position.Z);
+            sphere.SetPosition(Position);
         }
 
 
@@ -49,13 +53,14 @@ namespace AirplaneGame
             ColorSpecular = new Vector3(light.ColorSpecular.R, light.ColorSpecular.G, light.ColorSpecular.B);
             Direction = new Vector3(light.Direction.X, light.Direction.Y, light.Direction.Z);
             //Position = new Vector3(light.Position.X, light.Position.Y, light.Position.Z);
-            Position = new Vector3(3, 3, 3);
+            Position = new Vector3(30, 15, 5);
             Name = light.Name;
-
+            sphere.SetPosition(Position);
         }
 
         public void SetLightUniforms(Shader shader)
         {
+            sphere.SetPosition(Position);
             shader.SetVector3("light.Ambient", new Vector3(0.2f));
             shader.SetVector3("light.Diffuse", ColorDiffuse);
             shader.SetVector3("light.Specular", ColorSpecular);
@@ -72,6 +77,9 @@ namespace AirplaneGame
 
             
         }
-        
+        public void DrawLight(Shader shader)
+        {
+            sphere.Draw(shader);
+        }
     }
 }

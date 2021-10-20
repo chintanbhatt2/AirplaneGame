@@ -162,7 +162,16 @@ namespace AirplaneGame
                 Assimp.Mesh mesh = scene.Meshes[node.MeshIndices[i]];
 
                 this.meshes.Add(processMesh(mesh, scene, node));
+
+                try
+                {
                 MeshLocations.Add(node.Name, meshes[^1]);
+
+                }
+                catch(System.ArgumentException)
+                {
+
+                }
                 if (node.Parent.Name != "Scene")
                 {
                     MeshLocations[node.Parent.Name].Children.Add(meshes[^1]);
@@ -395,12 +404,5 @@ namespace AirplaneGame
         }
     }
 
-    public class Armature
-    {
-        public Dictionary<string, Structures.Mesh> MeshDictionary = new Dictionary<string, Structures.Mesh>();
-        public Armature(List<Structures.Mesh> Dependencies, Dictionary<string, Structures.Mesh> meshDict)
-        {
-            MeshDictionary = meshDict;
-        }
-    }
+
 }
