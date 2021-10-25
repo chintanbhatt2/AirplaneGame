@@ -68,11 +68,8 @@ void main()
 
     AmbientVec *= attenuation;
     DiffuseVec *= attenuation * intensity;
-    SpecularVec *= attenuation * intensity;
+    SpecularVec *= attenuation * intensity;\
 
-//    vec4 result = (Ambient + Diffuse) * vs_out.VertexColor;
-    
-//    vec3 result = Ambient * diffuseVec * Specular;
     vec3 result = SpecularVec * DiffuseVec * AmbientVec;
 
 

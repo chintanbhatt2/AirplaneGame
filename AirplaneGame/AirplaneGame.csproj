@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="Blender Objects\Materials\" />
-    <Folder Include="resources\skybox\daylight\" />
   </ItemGroup>
 
 </Project>

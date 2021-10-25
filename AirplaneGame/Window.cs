@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -14,56 +11,6 @@ namespace AirplaneGame
 
     public class Window : GameWindow
     {
-        float[] _vertices = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
-
-        private readonly uint[] _indices_old =
-        {
-            0, 1, 3,
-            1, 2, 3
-        };
 
         private Shader ObjectShader, LightingShader;
 
@@ -95,7 +42,6 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-            //_stls.Add(new Model(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae"));
 
             plane = new Airplane(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
@@ -103,7 +49,6 @@ namespace AirplaneGame
 
             GL.Enable(EnableCap.DepthTest);
 
-            //ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
             ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             SkyboxShader = new Shader(@"..\..\..\..\shaders\skybox_vertex.glsl", @"..\..\..\..\shaders\skybox_fragment.glsl");
@@ -117,6 +62,9 @@ namespace AirplaneGame
             plane.lockMeshRotation(false, true, true, "Airo1_-_Elev1-2_HorizontalStab1stat-1");
             skybox = new Skybox(Directory.GetFiles(@"..\..\..\..\resources\skybox\daylight"));
             CursorGrabbed = true;
+
+            SkyboxShader.SetInt("skybox", 0);
+            
         }
             
         private float scaleFactor = 0.1f;
@@ -132,21 +80,25 @@ namespace AirplaneGame
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 
-
             ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
             ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
             _lights.SetLightUniforms(ObjectShader);
 
-            ObjectShader.Use();
 
-            GL.Disable(EnableCap.DepthTest);
-            ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            ObjectShader.Use();
+            plane.Draw(ObjectShader);
+            
+            _lights.DrawLight(ObjectShader);
+            //GL.Disable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
+            SkyboxShader.Use();
+            SkyboxShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
             SkyboxShader.SetMatrix4("view", Cam.GetViewMatrix().ClearTranslation());
             skybox.Draw(SkyboxShader);
-            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Less);
+            //GL.Enable(EnableCap.DepthTest);
 
-            _lights.DrawLight(ObjectShader);
-            //plane.Draw(ObjectShader);
+
 
             SwapBuffers();
         }
@@ -155,7 +107,6 @@ namespace AirplaneGame
         {
             base.OnUpdateFrame(e);
 
-            //System.Console.WriteLine("Camera Position {0} \t Camera Angle {1}, {2} +++++++++ Rotation Vector {3}", _camera.Position, _camera.Pitch, _camera.Yaw, plane.rotationVector);
             plane.rotateMesh(0.0f, 0.0f, 0.001f, "Airo1_-_Propeller-2");
 
             Matrix4 modelRotation = plane.getModelTransform();

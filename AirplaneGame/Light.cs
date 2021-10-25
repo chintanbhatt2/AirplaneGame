@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Assimp;
+﻿using Assimp;
 using OpenTK.Mathematics;
-
 
 namespace AirplaneGame
 {
@@ -11,10 +8,11 @@ namespace AirplaneGame
         double AngleInnerCone, AngleOuterCone, AttenuationConstant, AttenuationLinear, AttentionQuadratic;
         Vector3 ColorAmbient, ColorDiffuse, ColorSpecular;
         Vector3 Direction, Position;
+        Matrix4 Transform;
         string Name;
         LightSourceType Type;
         PrimativeObjects.Cone sphere = new PrimativeObjects.Cone(@"..\..\..\..\Blender Objects\Cone.dae");
-        
+
         
 
         public Light(Assimp.Light light)
@@ -32,6 +30,7 @@ namespace AirplaneGame
             Name = light.Name;
             Position = new Vector3(light.Position.X, light.Position.Y, light.Position.Z);
             sphere.SetPosition(Position);
+
         }
 
 
@@ -56,14 +55,25 @@ namespace AirplaneGame
             Position = new Vector3(30, 15, 5);
             Name = light.Name;
             sphere.SetPosition(Position);
+
+            //findLightNode(aiScene);
         }
 
+        //void findLightNode(Assimp.Scene s, Assimp.Node node)
+        //{
+        //    if (node.Name == this.Name)
+        //    {
+        //        Transform = node.Transform;
+        //    }
+        //}
         public void SetLightUniforms(Shader shader)
         {
             sphere.SetPosition(Position);
-            shader.SetVector3("light.Ambient", new Vector3(0.2f));
+            shader.SetVector3("light.Ambient", new Vector3(0.5f));
             shader.SetVector3("light.Diffuse", ColorDiffuse);
             shader.SetVector3("light.Specular", ColorSpecular);
+            //shader.SetVector3("light.Diffuse", new Vector3(1.0f));
+            //shader.SetVector3("light.Specular", new Vector3(1.0f));
 
             shader.SetVector3("light.Position", new Vector3(30f, 30f, 0f));
             shader.SetVector3("light.Direction", Direction);
@@ -80,6 +90,13 @@ namespace AirplaneGame
         public void DrawLight(Shader shader)
         {
             sphere.Draw(shader);
+        }
+
+        public void SetColor(float r, float g, float b)
+        {
+            ColorDiffuse = new Vector3(r, g, b);
+            ColorSpecular = new Vector3(r, g, b);
+            ColorAmbient = new Vector3(r, g, b);
         }
     }
 }

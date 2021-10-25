@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
-using OpenTK.Graphics;
-using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace AirplaneGame
 {
     class Skybox
     {
-        List<Image> Faces = new List<Image>();
+        List<Bitmap> Faces = new List<Bitmap>();
         PrimativeObjects.Cube Box = new PrimativeObjects.Cube(@"..\..\..\..\Blender Objects\Cube.dae");
         public int TextureID;
         
@@ -22,7 +19,7 @@ namespace AirplaneGame
         {
             for (int i = 0; i < faces.Length; i++)
             {
-                Faces.Add(Image.FromFile(faces[i]));
+                Faces.Add((Bitmap)Image.FromFile(faces[i]));
             }
 
             TextureID = loadCubeMap();
@@ -40,10 +37,16 @@ namespace AirplaneGame
 
             for (int i = 0; i < Faces.Count; i++)
             {
-                byte[] textureByte = (byte[])new ImageConverter().ConvertTo(Faces[i], typeof(byte[]));
+                Console.WriteLine(Faces[i].GetPixel(0, 0));
+                var data = Faces[i].LockBits(new Rectangle(0, 0, Faces[i].Width, Faces[i].Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, Faces[i].PixelFormat);
+
+
                 width = Faces[i].Width;
                 height = Faces[i].Height;
-                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb, PixelType.Byte, textureByte);
+
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                Faces[i].UnlockBits(data);
+
             }
 
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
@@ -59,6 +62,8 @@ namespace AirplaneGame
 
         public void Draw(Shader shader)
         {
+            GL.BindTexture(TextureTarget.TextureCubeMap, this.TextureID);
+            
             Box.Draw(shader);
         }
     }

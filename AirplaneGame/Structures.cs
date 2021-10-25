@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -34,8 +29,8 @@ namespace AirplaneGame
             public Vertex[] vertices = { };
             public int[] indicies = { };
             Texture[] textures = { };
-            public Matrix4 transformMatrix = Matrix4.Identity;
-            public Matrix4 localMatrix = Matrix4.Identity;
+            public Matrix4 transformMatrix = Matrix4.CreateTranslation(0, 0, 0) * Matrix4.CreateRotationX(0) * Matrix4.CreateScale(1);
+            public Matrix4 localMatrix = Matrix4.CreateTranslation(0, 0, 0) * Matrix4.CreateRotationX(0) * Matrix4.CreateScale(1);
             public Mesh Parent;
             public List<Mesh> Children = new List<Mesh>();
             public string Name;
