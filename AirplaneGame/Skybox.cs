@@ -37,7 +37,6 @@ namespace AirplaneGame
 
             for (int i = 0; i < Faces.Count; i++)
             {
-                Console.WriteLine(Faces[i].GetPixel(0, 0));
                 var data = Faces[i].LockBits(new Rectangle(0, 0, Faces[i].Width, Faces[i].Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, Faces[i].PixelFormat);
 
 

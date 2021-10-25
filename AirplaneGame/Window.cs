@@ -162,6 +162,35 @@ namespace AirplaneGame
                     plane.rotateModel(0, 0, -0.001f);
                 }
             }
+            else if(input.IsKeyDown(Keys.LeftAlt))
+            {
+                if (input.IsKeyDown(Keys.W))
+                {
+                    plane.moveModel(-0.001f, 0, 0);
+                }
+
+                if (input.IsKeyDown(Keys.S))
+                {
+                    plane.moveModel(0.001f, 0, 0);
+                }
+                if (input.IsKeyDown(Keys.A))
+                {
+                    plane.moveModel(0, 0.001f, 0);
+                }
+                if (input.IsKeyDown(Keys.D))
+                {
+                    plane.moveModel(0, -0.001f, 0);
+                }
+
+                if (input.IsKeyDown(Keys.Q))
+                {
+                    plane.moveModel(0, 0, 0.001f);
+                }
+                if (input.IsKeyDown(Keys.E))
+                {
+                    plane.moveModel(0, 0, -0.001f);
+                }
+            }
             else
             {
                 if (input.IsKeyDown(Keys.W))

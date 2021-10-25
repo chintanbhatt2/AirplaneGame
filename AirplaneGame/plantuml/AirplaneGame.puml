@@ -1,16 +1,5 @@
 @startuml AirplaneGame
-class Animation {
-    + Duration : double <<get>>
-    + TicksPerSecond : double <<get>>
-    + RootNode : AssimpNodeData
-    + BoneInfoDict : Dictionary<string, Model.BoneInfo>
-    + transformation : Matrix4
-    + Bones : Bone[]
-    + Animation()
-    + Animation(animationPath:string, model:Model)
-    + FindBone(name:string) : Bone
-}
-Animation::Bones --> Bone
+
 class AssimpNodeData <<struct>> {
     + name : string <<get>> <<set>>
     + childrenCount : int <<get>> <<set>>
@@ -18,43 +7,6 @@ class AssimpNodeData <<struct>> {
 
 }
 
-Animation::RootNode <-- AssimpNodeData
-class Animator {
-    + FinalBoneMatricies : Matrix4[]
-    + Animator(animation:Animation)
-    + UpdateAnimation(dt:double) : void
-    + PlayAnimation(pAnimation:Animation) : void
-    + CalculateBoneTransform(node:Animation.AssimpNodeData, parentTransform:Matrix4) : void
-}
-
-class Bone {
-    + Name : string <<get>>
-    + ID : float <<get>>
-    + LocalTransform : Matrix4
-    + Bone(name:string, ID:float, channel:NodeAnimationChannel)
-    + Update(animationTime:double) : void
-    + GetRotationIndex(animationTime:double) : int
-    + GetScaleIndex(animationTime:double) : int
-    + GetPositionIndex(animationTime:double) : int
-    InterpolatePosition(animationTime:double) : OpenTK.Mathematics.Matrix4
-    InterpolateRotation(animationTime:double) : OpenTK.Mathematics.Matrix4
-    InterpolateScaling(animationTime:double) : OpenTK.Mathematics.Matrix4
-}
-class KeyPosition <<struct>> {
-    + timeStamp : double
-    + position : Vector3
-}
-class KeyRotation <<struct>> {
-    + timeStamp : double
-    + rotation : Vector3
-}
-class KeyScale <<struct>> {
-    + timeStamp : double
-    + scale : Vector3
-}
-Bone  <-- KeyPosition
-Bone  <-- KeyRotation
-Bone  <-- KeyScale
 class Camera {
     + Camera(position:Vector3, aspectRatio:float)
     + AspectRatio : float <<set>>
@@ -70,28 +22,35 @@ class Camera {
     + Right : Vector3
     + GetViewMatrix() : Matrix4
     + GetProjectionMatrix() : Matrix4
+    + UpdateVectors()
 }
 class Model {
     + directory : string
     + gammaCorrection : bool = false
-    + m_BoneCounter : int = 0
-    + boneInfoDict : Dictionary<string, BoneInfo>
     + offset : Matrix4
     + meshes : Structures.Meshes[]
     + Model(path:string)
     + Draw(shader:Shader) : void
+    + setMeshAngle(eulerAngles:Vector3, name:string)
+    + rotateMesh(x,y,z:float, name:string)
+    + lockMeshRotation(x,y,z:bool, name:string)
+    + rotateModel(xRotation:float, yRotation:float, zRotation:float)
 }
 
-class BoneInfo <<struct>> {
-    + id : float <<get>> <<set>>
-    + offset : Matrix4
+class Armature {
+    + MeshDictionary : Dictionary
+}
+class Airplane{
+    
 }
 
-Model::boneInfoDict  <-- BoneInfo
-class Program <<static>> {
-    nativeWindowSettings : NativeWindowSettings
-    window : Window
+class Terrain{
+    
 }
+Armature --+ Model
+Airplane +-- Model
+Terrain +-- Model
+
 class Shader {
     + <<readonly>> Handle : int
     + Shader(vertPath:string, fragPath:string)
@@ -162,10 +121,8 @@ class Window {
 }
 
 Window::models <-- Model
-Window::animations <-- Animation
 Model::meshes <-- Mesh
 Program --> Window
 Window::shader <-- Shader
 Window::camera <-- Camera
-Animator::Animator <-- Animation
 @enduml
