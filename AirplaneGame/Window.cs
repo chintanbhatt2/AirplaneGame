@@ -195,11 +195,11 @@ namespace AirplaneGame
 
             if (input.IsKeyPressed(Keys.F1))
             {
-                scaleFactor -= 0.1f;
+                plane.setModelPosition(0, 0, 0);
             }
             if (input.IsKeyPressed(Keys.F2))
             {
-                scaleFactor += 0.1f;
+                plane.setModelPosition(5, 5, 5);
             }
 
             

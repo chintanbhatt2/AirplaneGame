@@ -13,6 +13,11 @@ namespace AirplaneGame
         {
             loadModel(path);
         }
+
+        public Model()
+        {
+
+        }
         public void Draw(Shader shader)
         {
             for (int i = 0; i < meshes.Count; i++)
@@ -44,6 +49,11 @@ namespace AirplaneGame
             updateTransformation(RootMesh);
         }
 
+        public void setModelPosition(float xPosition, float yPosition, float zPosition)
+        {
+            ModelTransform.Column3 = new Vector4(xPosition, yPosition, zPosition, 1.0f);
+            updateTransformation(RootMesh);
+        }
 
         public Matrix4 getModelTransform()
         {
@@ -93,6 +103,13 @@ namespace AirplaneGame
 
 
             MeshLocations[name].localMatrix *= totalRotation;
+            updateTransformation(MeshLocations[name]);
+        }
+
+
+        public void setMeshPosition(float xPosition, float yPosition, float zPosition, string name)
+        {
+            MeshLocations[name].localMatrix.Column3 = new Vector4(xPosition, yPosition, zPosition, 1.0f);
             updateTransformation(MeshLocations[name]);
         }
 
