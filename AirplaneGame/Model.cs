@@ -49,11 +49,20 @@ namespace AirplaneGame
             updateTransformation(RootMesh);
         }
 
-        public void setModelPosition(float xPosition, float yPosition, float zPosition)
+        public void moveModel(float xMove, float yMove, float zMove)
         {
-            ModelTransform.Column3 = new Vector4(xPosition, yPosition, zPosition, 1.0f);
+            position.X += xMove;
+            position.Y += yMove;
+            position.Z += zMove;
+
+
+            ModelTransform = Matrix4.CreateFromQuaternion(rotationVector);
+            ModelTransform *= Matrix4.CreateScale(scale);
+            ModelTransform *= Matrix4.CreateTranslation(position);
+
             updateTransformation(RootMesh);
         }
+
 
         public Matrix4 getModelTransform()
         {
@@ -147,7 +156,6 @@ namespace AirplaneGame
 
         protected void updateTransformation(Structures.Mesh mesh)
         {
-
             if (mesh.Parent != null)
             {
                 mesh.transformMatrix = mesh.Parent.transformMatrix * mesh.localMatrix;
