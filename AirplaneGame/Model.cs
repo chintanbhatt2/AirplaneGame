@@ -13,6 +13,13 @@ namespace AirplaneGame
         {
             loadModel(path);
         }
+
+        public Model()
+        {
+
+        }
+
+
         public void Draw(Shader shader)
         {
             for (int i = 0; i < meshes.Count; i++)

@@ -29,6 +29,8 @@ namespace AirplaneGame
         public Airplane plane;
         public Shader SkyboxShader;
 
+        public Terrain terrain;
+
 
         Skybox skybox;
 
@@ -42,7 +44,7 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-
+            terrain = new Terrain(69, 3, 0.1);
             plane = new Airplane(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
