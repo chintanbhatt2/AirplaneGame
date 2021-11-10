@@ -224,11 +224,11 @@ namespace AirplaneGame
 
             if (input.IsKeyPressed(Keys.F1))
             {
-                plane.setModelPosition(0, 0, 0);
+                scaleFactor -= 0.1f;
             }
             if (input.IsKeyPressed(Keys.F2))
             {
-                plane.setModelPosition(5, 5, 5);
+                scaleFactor += 0.1f;
             }
 
             

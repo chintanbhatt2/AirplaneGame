@@ -6,9 +6,7 @@ namespace AirplaneGame
 
         public int xSize = 20;
         public int zSize = 20;
-
-        
-        public Terrain()
+        public Terrain(string path) : base(path)
         {
 
         }
