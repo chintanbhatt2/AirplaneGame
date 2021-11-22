@@ -73,6 +73,7 @@ void main()
     vec3 result = SpecularVec * DiffuseVec * AmbientVec;
 
 
-	fragColor = vec4(result, 1.0);
+	fragColor = vec4(result, 1.0) * vs_out.VertexColor;
+
 
 }

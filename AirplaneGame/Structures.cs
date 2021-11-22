@@ -9,10 +9,19 @@ namespace AirplaneGame
         private const int MAX_BONE_INFLUENCE = 4;
         public class Vertex
         {
-            public Vector3 Position, Normal; 
-            public Vector2 TexCoord;
-            public Vector3 Tangent, Bitangent;
-            public Vector4 Color;
+            public Vector3 Position = new Vector3(0); 
+            public Vector3 Normal = new Vector3(0); 
+            public Vector2 TexCoord = new Vector2(0);
+            public Vector3 Tangent = new Vector3(0);
+            public Vector3 Bitangent = new Vector3(0);
+            public Vector4 Color = new Vector4(0, 0, 0, 1);
+
+            public Vertex()
+            {
+                Position = new Vector3(0);
+                Normal = new Vector3(0);
+                Color = new Vector4(0, 0, 0, 1);
+            }
         }
 
         public struct Texture
@@ -54,6 +63,17 @@ namespace AirplaneGame
                 this.vertices = vertices;
                 this.indicies = indicies;
                 this.textures = textures;
+
+
+
+
+                setupMesh();
+            }
+
+            public Mesh(Vertex[] vertices, int[] indicies)
+            {
+                this.vertices = vertices;
+                this.indicies = indicies;
 
 
 

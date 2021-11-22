@@ -12,7 +12,7 @@ namespace AirplaneGame
     public class Window : GameWindow
     {
 
-        private Shader ObjectShader, LightingShader;
+        private Shader ObjectShader, LightingShader, TerrainShader;
 
         private Camera Cam;
 
@@ -29,7 +29,7 @@ namespace AirplaneGame
         public Airplane plane;
         public Shader SkyboxShader;
 
-        public Terrain terrain;
+        public TerrainChunk terrain;
 
 
         Skybox skybox;
@@ -44,7 +44,7 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-            terrain = new Terrain(69, 3, 0.1);
+            terrain = new TerrainChunk(69, 3, 0.1, 1, 1);
             plane = new Airplane(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -55,8 +55,7 @@ namespace AirplaneGame
             LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             SkyboxShader = new Shader(@"..\..\..\..\shaders\skybox_vertex.glsl", @"..\..\..\..\shaders\skybox_fragment.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
-       
-
+            TerrainShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
             Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             Cam.Pitch = -13.799696f;
             Cam.Yaw = -270.1763f;
@@ -88,8 +87,11 @@ namespace AirplaneGame
 
 
             ObjectShader.Use();
-            plane.Draw(ObjectShader);
-            
+            //plane.Draw(ObjectShader);
+            TerrainShader.SetMatrix4("view", Cam.GetViewMatrix());
+            TerrainShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            terrain.terrainMesh.Draw(TerrainShader);
+
             _lights.DrawLight(ObjectShader);
             //GL.Disable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Lequal);

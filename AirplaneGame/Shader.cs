@@ -108,7 +108,14 @@ namespace AirplaneGame
         public void SetMatrix4(string name, Matrix4 data)
         {
             GL.UseProgram(Handle);
-            GL.UniformMatrix4(_uniformLocations[name], true, ref data);
+            try
+            {
+                GL.UniformMatrix4(_uniformLocations[name], true, ref data);
+            }
+            catch(System.Collections.Generic.KeyNotFoundException)
+            {
+                Console.WriteLine("Could not find " + name + " in the shader");
+            }
         }
 
 
