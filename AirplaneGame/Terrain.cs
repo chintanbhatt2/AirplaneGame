@@ -4,7 +4,36 @@ using OpenTK.Mathematics;
 
 namespace AirplaneGame
 {
+    public class Terrain
+    {
+        public TerrainChunk[] Ter = new TerrainChunk[9];
+        public int seed, oct; 
+        public double freq;
+        public Terrain(Vector3 pos, int s, int o, double f)
+        {
+            seed = s;
+            oct = o;
+            freq = f;
 
+            for(int j = -1; j < 2; j++)
+            {
+                for(int i = -1; i < 2; i++)
+                {
+                    float xPosition = pos.X + ((float)i * TerrainChunk.xSize);
+                    float zPosition = pos.Z + ((float)j * TerrainChunk.zSize);
+                    Ter[(j + 1) * 3 + (i + 1)] = new TerrainChunk(seed, oct, freq, xPosition, zPosition);
+                }
+            }
+        }
+
+        public void Draw(Shader shader)
+        {
+            for(int i = 0; i < 9; i++)
+            {
+                Ter[i].terrainMesh.Draw(shader);
+            }
+        }
+    }
     public class TerrainChunk
     {
 
@@ -12,23 +41,21 @@ namespace AirplaneGame
         public static int zSize = 50;
         public static int heightMultiplier = 30;
 
-        private int chunkRadius = 5;
         private SharpNoise.Modules.Perlin perlin;
         private SharpNoise.NoiseMap noiseMap;
         private SharpNoise.Builders.PlaneNoiseMapBuilder noiseMapBuilder;
-        private Structures.Vertex[] vertexList;
         private int[] singleMeshIndicies;
         public Structures.Mesh terrainMesh;
         private int xLocation = 0;
         private int zLocation = 0;
+        private int indexCounter = 0;
 
-        public TerrainChunk(int seed, int oct, double freq, int xL, int zL)
+        public TerrainChunk(int seed, int oct, double freq, float xL, float zL)
         {
             xLocation = (int)(xL / xSize) * xSize;
             zLocation = (int)(zL / zSize) * zSize;
             int indexSize = ((xSize - 1) * (zSize - 1)) * 6;
             singleMeshIndicies = new int[indexSize];
-            vertexList = new Structures.Vertex[xSize * zSize];
             perlin = new SharpNoise.Modules.Perlin
             {
                 Seed = seed,
@@ -46,77 +73,67 @@ namespace AirplaneGame
             noiseMapBuilder.SetDestSize(xSize, zSize);
             noiseMapBuilder.SetBounds(-4, 4, -4, 4);
             noiseMapBuilder.Build();
-            setIndicies();
-            setVerticies();
-            createMesh();
+
+            terrainMesh = generateMeshTerrain();
+            terrainMesh.CalculateVertexNormals();
+            terrainMesh.setupMesh();
         }
 
-        private void setIndicies()
+        private void addTriangle(int a, int b, int c)
         {
-            int indexCounter = 0;
+            singleMeshIndicies[indexCounter] = a;
+            singleMeshIndicies[indexCounter + 1] = b;
+            singleMeshIndicies[indexCounter + 2] = c;
+            indexCounter += 3;
+        }
 
-            indexCounter = 0;
-            for (int y = 0; y < xSize; y++)
+
+
+        public Structures.Mesh generateMeshTerrain()
+        {
+            float topLeftX = (xSize - 1) / -2f;
+            float topLeftZ = (zSize - 1) / 2f;
+
+            Structures.Mesh meshData = new Structures.Mesh(xSize, zSize);
+            int vertexIndex = 0;
+
+            for (int y = 0; y < zSize; y++)
             {
-                for (int x = 0; x < zSize; x++)
+                for (int x = 0; x < xSize; x++)
                 {
-                    if (x < zSize-1 && y < xSize-1)
+                    meshData.vertices[vertexIndex] = new Structures.Vertex();
+                    meshData.vertices[vertexIndex].Position = new Vector3(topLeftX + x + xLocation, noiseMap[x,y] * heightMultiplier, topLeftZ - y - zLocation);
+                    meshData.vertices[vertexIndex].TexCoord = new Vector2(x / (float)xSize, y / (float)zSize);
+                    if (noiseMap[x, y] < 0.1)
                     {
-                        singleMeshIndicies[indexCounter] = x;
-                        singleMeshIndicies[indexCounter + 1] = x + 1;
-                        singleMeshIndicies[indexCounter + 2] = x + (y * xSize);
-                        singleMeshIndicies[indexCounter + 3] = x + 1;
-                        singleMeshIndicies[indexCounter + 4] = x + (y * xSize);
-                        singleMeshIndicies[indexCounter + 5] = x + (y * xSize) + 1;
-                        indexCounter+=6;
+                        meshData.vertices[vertexIndex].Color = new Vector4(0f, 0.61568f, 0.76862f, 1.0f);
+
                     }
-                }
-            }
-        }
+                    else if (noiseMap[x, y] < 0.2)
+                    {
+                        meshData.vertices[vertexIndex].Color = new Vector4(0f, 0.61568f, 0.76862f, 1.0f);
+                    }
+                    else if (noiseMap[x, y] < 0.7)
+                    {
+                        meshData.vertices[vertexIndex].Color = new Vector4(0.48627f, 0.98823f, 0, 1.0f);
+                    }
+                    else
+                    {
+                        meshData.vertices[vertexIndex].Color = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+                    }
+                    if (x < xSize -1 && y < zSize-1)
+                    {
+                        addTriangle(vertexIndex, vertexIndex + xSize + 1, vertexIndex + xSize);
+                        addTriangle(vertexIndex + xSize + 1, vertexIndex, vertexIndex + 1);
+                    }
 
-        private void setVerticies()
-        {
-            for (int i = 0; i < noiseMap.Data.Length; i++)
-            {
-                vertexList[i] = new Structures.Vertex();
-
-                if (noiseMap.Data[i] <= 0.1)
-                {
-                    vertexList[i].Color = new Vector4((float)(176 / 255), (float)(224 / 255), (float)(230 / 255), 1f);
-                }
-                else if (noiseMap.Data[i] <= 0.5)
-                {
-                    vertexList[i].Color = new Vector4((float)(127 / 255), (float)(255 / 255), (float)(0 / 255), 1f);
-                }
-                else if (noiseMap.Data[i] <= 0.7)
-                {
-                    vertexList[i].Color = new Vector4((float)(128 / 255), (float)(128 / 255), (float)(128 / 255), 1f);
-                }
-                else
-                {
-                    vertexList[i].Color = new Vector4((float)(1), (float)(1), (float)(1), 1f);
-                }
-
-
-                vertexList[i].Position.Y = noiseMap.Data[i] * heightMultiplier;
-
-            }
-
-            for (int j = 0; j < xSize; j++)
-            {
-                for (int i = 0; i < zSize; i++)
-                {
-                    int index = (j * xSize) + i;
-                    vertexList[index].Position.X = i + xLocation;
-                    vertexList[index].Position.Z = j + zLocation;
+                    vertexIndex++;
                 }
             }
 
-        }
+            meshData.indicies = singleMeshIndicies;
 
-        private void createMesh()
-        {
-            terrainMesh = new Structures.Mesh(vertexList, singleMeshIndicies);
+            return meshData;
         }
 
     }

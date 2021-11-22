@@ -6,9 +6,9 @@ using Assimp;
 
 namespace AirplaneGame
 {
-    public class ASSIMPHelper
+    public static class ASSIMPHelper
     {
-        public Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)
+        public static Matrix4 convertASSIMPtoOpenGLMat(Matrix4x4 assimp)
         {
             //  It's ugly but what can you do ¯\_(ツ)_/¯
             return new Matrix4(assimp.A1, assimp.A2, assimp.A3, assimp.A4,

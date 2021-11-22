@@ -56,6 +56,90 @@ namespace AirplaneGame
             }
         }
 
+        public Shader(string vertPath, string fragPath, string geoPath)
+        {
+
+            var shaderSource = File.ReadAllText(vertPath);
+            var vertexShader = GL.CreateShader(ShaderType.VertexShader);
+
+            GL.ShaderSource(vertexShader, shaderSource);
+
+            CompileShader(vertexShader);
+
+            shaderSource = File.ReadAllText(fragPath);
+            var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+            GL.ShaderSource(fragmentShader, shaderSource);
+            CompileShader(fragmentShader);
+
+            shaderSource = File.ReadAllText(geoPath);
+            var geoShader = GL.CreateShader(ShaderType.GeometryShader);
+            GL.ShaderSource(geoShader, shaderSource);
+            CompileShader(geoShader);
+
+
+            Handle = GL.CreateProgram();
+
+            GL.AttachShader(Handle, vertexShader);
+            GL.AttachShader(Handle, fragmentShader);
+            GL.AttachShader(Handle, geoShader);
+
+            LinkProgram(Handle);
+
+            GL.DetachShader(Handle, vertexShader);
+            GL.DetachShader(Handle, fragmentShader);
+            GL.DetachShader(Handle, geoShader);
+            GL.DeleteShader(fragmentShader);
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(geoShader);
+
+
+            GL.GetProgram(Handle, GetProgramParameterName.ActiveUniforms, out var numberOfUniforms);
+
+            _uniformLocations = new Dictionary<string, int>();
+
+            for (var i = 0; i < numberOfUniforms; i++)
+            {
+                var key = GL.GetActiveUniform(Handle, i, out _, out _);
+
+                var location = GL.GetUniformLocation(Handle, key);
+
+                _uniformLocations.Add(key, location);
+            }
+        }
+
+        public Shader(string computePath)
+        {
+
+            var shaderSource = File.ReadAllText(computePath);
+            var computeShader = GL.CreateShader(ShaderType.ComputeShader);
+
+            GL.ShaderSource(computeShader, shaderSource);
+
+            CompileShader(computeShader);
+
+            Handle = GL.CreateProgram();
+
+            GL.AttachShader(Handle, computeShader);
+
+            LinkProgram(Handle);
+
+            GL.DetachShader(Handle, computeShader);
+            GL.DeleteShader(computeShader);
+
+            GL.GetProgram(Handle, GetProgramParameterName.ActiveUniforms, out var numberOfUniforms);
+
+            _uniformLocations = new Dictionary<string, int>();
+
+            for (var i = 0; i < numberOfUniforms; i++)
+            {
+                var key = GL.GetActiveUniform(Handle, i, out _, out _);
+
+                var location = GL.GetUniformLocation(Handle, key);
+
+                _uniformLocations.Add(key, location);
+            }
+        }
+
         private static void CompileShader(int shader)
         {
             GL.CompileShader(shader);

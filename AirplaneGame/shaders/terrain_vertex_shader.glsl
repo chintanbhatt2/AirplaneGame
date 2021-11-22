@@ -13,14 +13,16 @@ out VS_OUT {
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 model;
 uniform mat4 transform;
 
 void main(void)
 {
         vs_out.TexCoords = aTexCoord;
         vs_out.VertexColor = aVertexColor;
+        vec4 newPos = model * vec4(aPosition, 1.0) ;
 
-        vs_out.FragPos = aPosition;
-        vs_out.Normal = aNormal;
-        gl_Position = vec4(aPosition, 1.0) * view * projection;
+        vs_out.FragPos = vec3(newPos);
+        vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
+        gl_Position = newPos * view * projection;
 }

@@ -57,6 +57,12 @@ namespace AirplaneGame
                 setupMesh();
             }
 
+            public Mesh(int width, int height)
+            {
+                this.vertices = new Vertex[width * height];
+                this.indicies = new int[((width - 1) * (height - 1)) * 6];
+
+            }
 
             public Mesh(Vertex[] vertices, int[] indicies, Texture[] textures)
             {
@@ -105,11 +111,36 @@ namespace AirplaneGame
                 return varray;
             }
 
-            private void setBufferSubData()
+
+            public void CalculateVertexNormals()
             {
+
+                for (int vertex = 0; vertex < vertices.Length; vertex++)
+                    vertices[vertex].Normal = Vector3.Zero;
+
+                for (int index = 0; index < indicies.Length; index += 3)
+                {
+                    int vertexA = indicies[index];
+                    int vertexB = indicies[index + 1];
+                    int vertexC = indicies[index + 2];
+
+                    
+                    var edgeAB = vertices[vertexB].Position - vertices[vertexA].Position;
+                    var edgeAC = vertices[vertexC].Position - vertices[vertexA].Position;
+
+                    var areaWeightedNormal = Vector3.Cross(edgeAB, edgeAC);
+
+
+                    vertices[vertexA].Normal += areaWeightedNormal;
+                    vertices[vertexB].Normal += areaWeightedNormal;
+                    vertices[vertexC].Normal += areaWeightedNormal;
+                }
+
+                for (int vertex = 0; vertex < vertices.Length; vertex++)
+                    vertices[vertex].Normal = Vector3.Normalize(vertices[vertex].Normal);
             }
 
-            private void setupMesh() //TODO: update code for C# reference based
+            public void setupMesh() //TODO: update code for C# reference based
             {
                 VAO = GL.GenVertexArray();
                 VBO = GL.GenBuffer();

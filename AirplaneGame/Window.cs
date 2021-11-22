@@ -29,7 +29,7 @@ namespace AirplaneGame
         public Airplane plane;
         public Shader SkyboxShader;
 
-        public TerrainChunk terrain;
+        public Terrain ter;
 
 
         Skybox skybox;
@@ -44,7 +44,6 @@ namespace AirplaneGame
             base.OnLoad();
 
 
-            terrain = new TerrainChunk(69, 3, 0.1, 1, 1);
             plane = new Airplane(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -52,10 +51,9 @@ namespace AirplaneGame
             GL.Enable(EnableCap.DepthTest);
 
             ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
-            LightingShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             SkyboxShader = new Shader(@"..\..\..\..\shaders\skybox_vertex.glsl", @"..\..\..\..\shaders\skybox_fragment.glsl");
+            TerrainShader = new Shader(@"..\..\..\..\shaders\terrain_vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
-            TerrainShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\fragment_shader.glsl");
             Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             Cam.Pitch = -13.799696f;
             Cam.Yaw = -270.1763f;
@@ -66,6 +64,7 @@ namespace AirplaneGame
 
             SkyboxShader.SetInt("skybox", 0);
             
+            ter = new Terrain(Cam.Position, 69, 3, 0.1);
         }
             
         private float scaleFactor = 0.1f;
@@ -86,11 +85,10 @@ namespace AirplaneGame
             _lights.SetLightUniforms(ObjectShader);
 
 
-            ObjectShader.Use();
             //plane.Draw(ObjectShader);
-            TerrainShader.SetMatrix4("view", Cam.GetViewMatrix());
-            TerrainShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
-            terrain.terrainMesh.Draw(TerrainShader);
+            //terrain.terrainMesh.Draw(ObjectShader);
+            ter.Draw(ObjectShader);
+
 
             _lights.DrawLight(ObjectShader);
             //GL.Disable(EnableCap.DepthTest);
@@ -166,11 +164,40 @@ namespace AirplaneGame
                     plane.rotateModel(0, 0, -0.001f);
                 }
             }
-            else if(input.IsKeyDown(Keys.LeftAlt))
+            else if (input.IsKeyDown(Keys.LeftAlt))
             {
                 if (input.IsKeyDown(Keys.W))
                 {
                     plane.moveModel(-0.001f, 0, 0);
+                }
+
+                if (input.IsKeyDown(Keys.S))
+                {
+                    plane.moveModel(0.001f, 0, 0);
+                }
+                if (input.IsKeyDown(Keys.A))
+                {
+                    plane.moveModel(0, 0.001f, 0);
+                }
+                if (input.IsKeyDown(Keys.D))
+                {
+                    plane.moveModel(0, -0.001f, 0);
+                }
+
+                if (input.IsKeyDown(Keys.Q))
+                {
+                    plane.moveModel(0, 0, 0.001f);
+                }
+                if (input.IsKeyDown(Keys.E))
+                {
+                    plane.moveModel(0, 0, -0.001f);
+                }
+            }
+            else if (input.IsKeyDown(Keys.RightControl))
+            {
+                if (input.IsKeyDown(Keys.W))
+                {
+                    _lights.movePosition(new Vector3(1f, 0, 0), ObjectShader);
                 }
 
                 if (input.IsKeyDown(Keys.S))

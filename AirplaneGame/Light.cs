@@ -56,16 +56,29 @@ namespace AirplaneGame
             Name = light.Name;
             sphere.SetPosition(Position);
 
-            //findLightNode(aiScene);
+            findLightNode(aiScene.RootNode);
         }
 
-        //void findLightNode(Assimp.Scene s, Assimp.Node node)
-        //{
-        //    if (node.Name == this.Name)
-        //    {
-        //        Transform = node.Transform;
-        //    }
-        //}
+        public void movePosition(Vector3 v, Shader shader)
+        {
+            Position += v;
+            shader.SetVector3("light.Position", Position);
+        }
+
+        void findLightNode(Assimp.Node node)
+        {
+            if (node.Name == this.Name)
+            {
+                Transform = ASSIMPHelper.convertASSIMPtoOpenGLMat(node.Transform);
+                return;
+            }
+
+            for (int i = 0; i < node.ChildCount; i++)
+            {
+                findLightNode(node.Children[i]);
+            }
+
+        }
         public void SetLightUniforms(Shader shader)
         {
             sphere.SetPosition(Position);

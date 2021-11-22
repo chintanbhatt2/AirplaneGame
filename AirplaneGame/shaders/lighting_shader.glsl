@@ -3,10 +3,6 @@
 
 out vec4 fragColor;
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
-uniform vec3 lightPos;
-
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
@@ -61,19 +57,15 @@ void main()
     float distance = length(light.Position - vs_out.FragPos);
     float attenuation = 1.0 / (light.Constant + light.Linear * distance * light.Quadratic * (distance * distance));
     
-
     float theta = dot(light.Direction, normalize(-light.Direction));
     float epsilon = light.CutOff - light.OuterCutOff;
     float intensity = clamp((theta - light.OuterCutOff) / epsilon, 0.0, 0.1);
 
     AmbientVec *= attenuation;
     DiffuseVec *= attenuation * intensity;
-    SpecularVec *= attenuation * intensity;\
+    SpecularVec *= attenuation * intensity;
 
     vec3 result = SpecularVec * DiffuseVec * AmbientVec;
 
-
 	fragColor = vec4(result, 1.0) * vs_out.VertexColor;
-
-
 }
