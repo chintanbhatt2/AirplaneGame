@@ -1,4 +1,5 @@
-﻿using Assimp;
+﻿using System;
+using Assimp;
 using OpenTK.Mathematics;
 
 namespace AirplaneGame
@@ -23,7 +24,7 @@ namespace AirplaneGame
             AttenuationConstant = light.AttenuationConstant;
             AttenuationLinear = light.AttenuationLinear;
             AttentionQuadratic = light.AttenuationQuadratic;
-            ColorAmbient = new Vector3(light.ColorAmbient.R/100, light.ColorAmbient.G / 100, light.ColorAmbient.B / 100);
+            ColorAmbient = new Vector3(light.ColorAmbient.R / 100, light.ColorAmbient.G / 100, light.ColorAmbient.B / 100);
             ColorDiffuse = new Vector3(light.ColorDiffuse.R / 100, light.ColorDiffuse.G / 100, light.ColorDiffuse.B / 100);
             ColorSpecular = new Vector3(light.ColorSpecular.R / 100, light.ColorSpecular.G / 100, light.ColorSpecular.B / 100);
             Direction = new Vector3(light.Direction.X, light.Direction.Y, light.Direction.Z);
@@ -79,24 +80,40 @@ namespace AirplaneGame
             }
 
         }
-        public void SetLightUniforms(Shader shader)
+
+        [Flags]
+        public enum UniformFlags
+        {
+            None = 0,
+            Ambient = 1,
+            Diffuse = 2,
+            Specular = 4,
+            Position = 8,
+            Direction = 16,
+            CutOff = 32,
+            OuterCutOff = 64,
+            Constant = 128,
+            Linear = 256,
+            Quadratic = 512
+        }
+        public void SetLightUniforms(Shader shader, UniformFlags f)
         {
             sphere.SetPosition(Position);
-            shader.SetVector3("light.Ambient", new Vector3(0.5f));
-            shader.SetVector3("light.Diffuse", ColorDiffuse);
-            shader.SetVector3("light.Specular", ColorSpecular);
+            if (f.HasFlag(UniformFlags.Ambient)) shader.SetVector3("light.Ambient", new Vector3(0.5f));
+            if (f.HasFlag(UniformFlags.Diffuse)) shader.SetVector3("light.Diffuse", ColorDiffuse);
+            if (f.HasFlag(UniformFlags.Specular)) shader.SetVector3("light.Specular", ColorSpecular);
             //shader.SetVector3("light.Diffuse", new Vector3(1.0f));
             //shader.SetVector3("light.Specular", new Vector3(1.0f));
 
-            shader.SetVector3("light.Position", new Vector3(30f, 30f, 0f));
-            shader.SetVector3("light.Direction", Direction);
+            if (f.HasFlag(UniformFlags.Position)) shader.SetVector3("light.Position", new Vector3(30f, 30f, 0f));
+            if (f.HasFlag(UniformFlags.Direction)) shader.SetVector3("light.Direction", Direction);
 
-            shader.SetFloat("light.CutOff", (float)AngleInnerCone);
-            shader.SetFloat("light.OuterCutOff", (float)AngleOuterCone);
+            if (f.HasFlag(UniformFlags.CutOff)) shader.SetFloat("light.CutOff", (float)AngleInnerCone);
+            if (f.HasFlag(UniformFlags.OuterCutOff)) shader.SetFloat("light.OuterCutOff", (float)AngleOuterCone);
 
-            shader.SetFloat("light.Constant", (float)AttenuationConstant);
-            shader.SetFloat("light.Linear", (float)AttenuationLinear);
-            shader.SetFloat("light.Quadratic", (float)AttentionQuadratic);
+            if (f.HasFlag(UniformFlags.Constant)) shader.SetFloat("light.Constant", (float)AttenuationConstant);
+            if (f.HasFlag(UniformFlags.Linear)) shader.SetFloat("light.Linear", (float)AttenuationLinear);
+            if (f.HasFlag(UniformFlags.Quadratic)) shader.SetFloat("light.Quadratic", (float)AttentionQuadratic);
 
             
         }

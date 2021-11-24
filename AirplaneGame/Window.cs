@@ -50,9 +50,11 @@ namespace AirplaneGame
 
             GL.Enable(EnableCap.DepthTest);
 
+            
+
             ObjectShader = new Shader(@"..\..\..\..\shaders\vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
             SkyboxShader = new Shader(@"..\..\..\..\shaders\skybox_vertex.glsl", @"..\..\..\..\shaders\skybox_fragment.glsl");
-            TerrainShader = new Shader(@"..\..\..\..\shaders\terrain_vertex_shader.glsl", @"..\..\..\..\shaders\lighting_shader.glsl");
+            TerrainShader = new Shader(@"..\..\..\..\shaders\terrain_vertex_shader.glsl", @"..\..\..\..\shaders\terrain_fragment_shader.glsl");
             _lights = new Light(@"..\..\..\..\Blender Objects\Airplane_Lighting.dae");
             Cam = new Camera(new Vector3(0.054436013f, 12.051596f, -26.652008f), Size.X / (float)Size.Y);
             Cam.Pitch = -13.799696f;
@@ -64,7 +66,7 @@ namespace AirplaneGame
 
             SkyboxShader.SetInt("skybox", 0);
             
-            ter = new Terrain(Cam.Position, 69, 3, 0.1);
+            ter = new Terrain(Cam.Position, 69, 8, 0.01);
         }
             
         private float scaleFactor = 0.1f;
@@ -82,12 +84,15 @@ namespace AirplaneGame
 
             ObjectShader.SetMatrix4("view", Cam.GetViewMatrix());
             ObjectShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
-            _lights.SetLightUniforms(ObjectShader);
+            _lights.SetLightUniforms(ObjectShader, (Light.UniformFlags)1023);
 
 
             //plane.Draw(ObjectShader);
-            //terrain.terrainMesh.Draw(ObjectShader);
-            ter.Draw(ObjectShader);
+            TerrainShader.SetMatrix4("view", Cam.GetViewMatrix());
+            TerrainShader.SetMatrix4("projection", Cam.GetProjectionMatrix());
+            ter.Draw(TerrainShader);
+            _lights.SetLightUniforms(TerrainShader, Light.UniformFlags.Ambient);
+
 
 
             _lights.DrawLight(ObjectShader);
