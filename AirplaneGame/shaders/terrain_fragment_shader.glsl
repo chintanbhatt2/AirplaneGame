@@ -1,43 +1,50 @@
-﻿#version 440
+﻿#version 440 core 
+
 
 out vec4 fragColor;
 
-
-struct Light {
-
-	vec3 Position;
-	vec3 Direction;
-	float CutOff;
-	float OuterCutOff;
-
-	vec3 Ambient;
-	vec3 Diffuse;
-	vec3 Specular;
-
-	float Constant;
-	float Linear;
-	float Quadratic;
-
+struct Light{
+    vec4 Position;
+    vec3 Intensity;
 };
 
-uniform Light light;
-uniform vec3 ViewPosition;
+struct Material{
+    vec3 Kd;
+    vec3 Ka;
+    vec3 Ks;
+    float Shininess;
+};
+
 
 in VS_OUT {
-    vec3 FragPos;
+    vec3 Position;
     vec3 Normal;
     vec2 TexCoords;
-    flat vec4 VertexColor;
-	float DistToCam;
-	float Visibility;
+    vec4 VertexColor;
 } vs_out;
 
+uniform Light light;
+uniform Material mat;
 
+vec3 ads()
+{
+    vec3 s;
+        s = normalize(vec3(light.Position));
+
+    vec3 surfaceColor = vec3(vs_out.VertexColor);
+    vec3 newd = vec3(0.2,0.2,0.2);
+    vec3 newa = vec3(0.4);
+    vec3 n = normalize(vs_out.Normal);
+    vec3 v = normalize(vec3(-vs_out.Position));
+    vec3 r = reflect(-s, n);
+    return  
+            ( mat.Ka +
+            mat.Kd * max( dot(s, n), 0.0 ) +
+            mat.Ks * pow( max( dot(r,v), 0.0 ), mat.Shininess ) ) * light.Intensity ;
+}
 
 void main()
 {
-	
-	vec3 AmbientVec = light.Ambient * vec3(vs_out.VertexColor);
-	fragColor = vec4(AmbientVec, 1);
-	fragColor = mix(vec4(255, 255, 255, 255), fragColor, vs_out.Visibility);
+	fragColor = vec4(mix(ads(), vec3(vs_out.VertexColor), 0.5416894), 1.0);
+//    fragColor = vs_out.VertexColor;
 }

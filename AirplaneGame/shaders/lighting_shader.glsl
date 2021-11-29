@@ -3,69 +3,45 @@
 
 out vec4 fragColor;
 
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-    float shininess;
-
+struct Light{
+    vec4 Position;
+    vec3 Intensity;
 };
 
-struct Light {
-    vec3  Position;
-    vec3  Direction;
-    float CutOff;
-    float OuterCutOff;
-
-    vec3 Ambient;
-    vec3 Diffuse;
-    vec3 Specular;
-
-    float Constant;
-    float Linear;
-    float Quadratic;
+struct Material{
+    vec3 Kd;
+    vec3 Ka;
+    vec3 Ks;
+    float Shininess;
 };
 
-uniform Light light;
-uniform Material material;
-uniform vec3 ViewPosition;
 
 in VS_OUT {
-    vec3 FragPos;
+    vec3 Position;
     vec3 Normal;
     vec2 TexCoords;
     vec4 VertexColor;
 } vs_out;
 
+uniform Light light;
+uniform Material mat;
+
+vec3 ads()
+{
+    vec3 s;
+        s = normalize(vec3(light.Position));
+
+
+    vec3 n = normalize(vs_out.Normal);
+    vec3 v = normalize(vec3(-vs_out.Position));
+    vec3 r = reflect(-s, n);
+    return  
+            ( mat.Ka +
+            mat.Kd * max( dot(s, n), 0.0 ) +
+            mat.Ks * pow( max( dot(r,v), 0.0 ), mat.Shininess ) ) * light.Intensity ;
+}
+
 void main()
 {
-    //ambient
-    vec3 AmbientVec = light.Ambient * vec3(vs_out.VertexColor);
-
-    //diffuse
-    vec3 norm = normalize(vs_out.Normal);
-    vec3 lightDirection = normalize(light.Position - vs_out.FragPos);
-    float Diffuse = max(dot(norm, light.Direction), 0.0);
-    vec3 DiffuseVec = light.Diffuse * Diffuse * vec3(vs_out.VertexColor);
-
-    //Specular
-    vec3 ViewDirection = normalize(ViewPosition - vs_out.FragPos);
-    vec3 reflectDir = reflect(-light.Direction, norm);
-    float spec = pow(max(dot(ViewDirection, reflectDir), 0.0), 0.5);
-    vec3 SpecularVec = light.Specular * spec * vec3(vs_out.VertexColor);
-
-    //Attenuation 
-    float distance = length(light.Position - vs_out.FragPos);
-    float attenuation = 1.0 / (light.Constant + light.Linear * distance * light.Quadratic * (distance * distance));
-    
-    float theta = dot(light.Direction, normalize(-light.Direction));
-    float epsilon = light.CutOff - light.OuterCutOff;
-    float intensity = clamp((theta - light.OuterCutOff) / epsilon, 0.0, 0.1);
-
-    AmbientVec *= attenuation;
-    DiffuseVec *= attenuation * intensity;
-    SpecularVec *= attenuation * intensity;
-
-    vec3 result = SpecularVec * DiffuseVec * AmbientVec;
-
-	fragColor = vec4(result, 1.0) * vs_out.VertexColor;
+	fragColor = vec4(ads(), 1.0);
 }
